@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { after, before, describe, test } from 'node:test';
@@ -9,7 +9,10 @@ import sharp from 'sharp';
 
 import { buildTouchIcon, normalizeCategory, optimizeImage, slugifyName } from '../prepare-assets.mjs';
 
-const hashFile = async (p) => createHash('sha256').update(await readFile(p)).digest('hex');
+const hashFile = async (p) =>
+  createHash('sha256')
+    .update(await readFile(p))
+    .digest('hex');
 
 describe('normalizeCategory', () => {
   test('maps the misspelled source folder to its canonical name', () => {

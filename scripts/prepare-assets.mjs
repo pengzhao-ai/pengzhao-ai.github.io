@@ -112,7 +112,10 @@ export async function buildOgImage(dest) {
 /** Render a square PNG (the iOS home-screen icon) from an SVG. */
 export async function buildTouchIcon(svgPath, dest) {
   await mkdir(path.dirname(dest), { recursive: true });
-  await sharp(await readFile(svgPath)).resize(180, 180).png().toFile(dest);
+  await sharp(await readFile(svgPath))
+    .resize(180, 180)
+    .png()
+    .toFile(dest);
 }
 
 export async function main() {

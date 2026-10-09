@@ -31,7 +31,7 @@
 
 These are the input classes and failure modes the spec implies but whose tests no single task obviously owns. Each line names the behaviour a reasonable person would expect, and the task that pins it with a test.
 
-1. **A blog draft whose first `#` heading is inside a fenced code block.** Expect: the code block's comment is *not* taken as the post title; the real H1 (or the filename) wins. → Task 4.
+1. **A blog draft whose first `#` heading is inside a fenced code block.** Expect: the code block's comment is _not_ taken as the post title; the real H1 (or the filename) wins. → Task 4.
 2. **A photograph dropped in a category folder the site has never seen.** Expect: it appears on `/photography` under a humanised heading; it is not silently dropped and does not break the build. → Task 7.
 3. **A publication with no DOI, no PDF, and no code link.** Expect: the row renders with the links it has and does not emit empty `<a href="">` elements or a broken layout. → Task 5.
 4. **A hand-edited synced post.** Expect: the sync script reports a conflict and refuses to overwrite rather than silently discarding the edit. → Task 4.
@@ -44,11 +44,13 @@ These are the input classes and failure modes the spec implies but whose tests n
 Remove AstroWind's demo surface so the build output contains only the owner's site, and establish a green build to build on.
 
 **Files:**
+
 - Delete: `src/pages/homes/`, `src/pages/landing/`, `src/pages/services.astro`, `src/pages/pricing.astro`, `src/pages/about.astro`, `src/pages/contact.astro`, `src/data/post/`, `public/decapcms/`, `netlify.toml`, `vercel.json`, `wrangler.jsonc`
 - Modify: `src/pages/index.astro`, `src/navigation.ts`, `.gitignore`, `package.json`
 - Create: `src/data/post/.gitkeep` (the blog collection's `base` directory must exist)
 
 **Interfaces:**
+
 - Consumes: nothing.
 - Produces: an empty `src/data/post/` collection directory; `npm run build` green with a one-page site.
 
@@ -199,11 +201,13 @@ text sources."
 Downscale and de-EXIF the owner's photographs and profile picture into committable web copies, and generate the Open Graph card. Without this, the originals (129 MB, one file 20 MB) cannot enter the repository.
 
 **Files:**
+
 - Create: `scripts/prepare-assets.mjs`, `scripts/tests/prepare-assets.test.mjs`, `src/assets/favicons/favicon.svg`
 - Overwritten: `src/assets/favicons/apple-touch-icon.png` (the template's binary, replaced by the generated one)
 - Generated (committed): `src/assets/images/profile.jpg`, `src/assets/images/photography/<category>/<name>.jpg`, `src/assets/images/og-default.jpg`, `src/assets/favicons/apple-touch-icon.png`
 
 **Interfaces:**
+
 - Consumes: `artifacts/Profile.jpg`, `artifacts/photography/<category>/*.JPG`
 - Produces:
   - `normalizeCategory(dir: string): string` — maps `protrait` → `portrait`
@@ -229,7 +233,10 @@ import sharp from 'sharp';
 
 import { normalizeCategory, optimizeImage, slugifyName } from '../prepare-assets.mjs';
 
-const hashFile = async (p) => createHash('sha256').update(await readFile(p)).digest('hex');
+const hashFile = async (p) =>
+  createHash('sha256')
+    .update(await readFile(p))
+    .digest('hex');
 
 describe('normalizeCategory', () => {
   test('maps the misspelled source folder to its canonical name', () => {
@@ -547,7 +554,10 @@ In `scripts/prepare-assets.mjs`, export a builder alongside `buildOgImage`:
 /** Render a square PNG (the iOS home-screen icon) from an SVG. */
 export async function buildTouchIcon(svgPath, dest) {
   await mkdir(path.dirname(dest), { recursive: true });
-  await sharp(await readFile(svgPath)).resize(180, 180).png().toFile(dest);
+  await sharp(await readFile(svgPath))
+    .resize(180, 180)
+    .png()
+    .toFile(dest);
 }
 ```
 
@@ -590,13 +600,13 @@ describe('buildTouchIcon', () => {
 Then wire it into `main()`, after the `buildOgImage` call:
 
 ```js
-  // Same SVG as the favicon, so the tab icon and the home-screen icon
-  // can never drift apart.
-  await buildTouchIcon(
-    path.join(ROOT, 'src/assets/favicons/favicon.svg'),
-    path.join(ROOT, 'src/assets/favicons/apple-touch-icon.png')
-  );
-  rows.push(['apple-touch-icon.png', null]);
+// Same SVG as the favicon, so the tab icon and the home-screen icon
+// can never drift apart.
+await buildTouchIcon(
+  path.join(ROOT, 'src/assets/favicons/favicon.svg'),
+  path.join(ROOT, 'src/assets/favicons/apple-touch-icon.png')
+);
+rows.push(['apple-touch-icon.png', null]);
 ```
 
 Then generate everything:
@@ -656,9 +666,11 @@ binaries with the owner's monogram."
 Apply the Precision Deep Tech identity through the template's existing theming seams, and remove the template author's identifiers.
 
 **Files:**
+
 - Modify: `src/config.yaml`, `src/components/CustomStyles.astro`, `astro.config.ts`, `src/layouts/Layout.astro:35`, `src/assets/styles/tailwind.css`, `src/components/Logo.astro`, `src/components/Favicons.astro`
 
 **Interfaces:**
+
 - Consumes: `src/assets/images/og-default.jpg` (Task 2), `src/assets/favicons/favicon.svg` and `apple-touch-icon.png` (Task 2)
 - Produces: CSS variables `--aw-font-mono` and the Tailwind utility `font-mono`, consumed by every later component task; `SITE`/`METADATA` values consumed by `Metadata.astro`.
 
@@ -819,8 +831,8 @@ This is the risk flagged in spec §11. Record which fonts needed discrete weight
 In `src/layouts/Layout.astro`, immediately after the existing `<Font cssVariable="--font-inter" preload />` line (around line 35), add:
 
 ```astro
-    <Font cssVariable="--font-space-grotesk" preload />
-    <Font cssVariable="--font-jetbrains-mono" preload />
+<Font cssVariable="--font-space-grotesk" preload />
+<Font cssVariable="--font-jetbrains-mono" preload />
 ```
 
 - [ ] **Step 7: Add the mono font token to Tailwind**
@@ -828,8 +840,7 @@ In `src/layouts/Layout.astro`, immediately after the existing `<Font cssVariable
 In `src/assets/styles/tailwind.css`, inside the `@theme { ... }` block, immediately after the `--font-heading:` entry, add:
 
 ```css
-  --font-mono:
-    var(--aw-font-mono, ui-monospace), ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+--font-mono: var(--aw-font-mono, ui-monospace), ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 ```
 
 This makes `font-mono` a real utility. Every tag badge, spec list, and metadata label on the site uses it — it is the main carrier of the "precision instrument" feel.
@@ -929,10 +940,12 @@ owner's identity."
 Turn raw Markdown drafts in `artifacts/blog/` into posts the site renders, inferring the frontmatter AstroWind requires. Runs locally and commits its output; it must never silently destroy an edit.
 
 **Files:**
+
 - Create: `scripts/sync-posts.mjs`, `scripts/tests/sync-posts.test.mjs`, `artifacts/blog/welcome.md`, `scripts/.sync-state.json` (generated), `.agents/skills/sync-blog-posts.md`
 - Generated (committed): `src/data/post/welcome.md`
 
 **Interfaces:**
+
 - Consumes: nothing from earlier tasks (runs standalone).
 - Produces:
   - `parseSource(raw: string): { frontmatter: object; body: string }`
@@ -951,7 +964,7 @@ Turn raw Markdown drafts in `artifacts/blog/` into posts the site renders, infer
 
 Create `scripts/tests/sync-posts.test.mjs`:
 
-```js
+````js
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
@@ -1041,7 +1054,10 @@ describe('humanize', () => {
 
 describe('stripInline', () => {
   test('unwraps links, code, emphasis, and HTML', () => {
-    assert.equal(stripInline('a [link](https://x) and `code` and **bold** and <b>tag</b>'), 'a link and code and bold and tag');
+    assert.equal(
+      stripInline('a [link](https://x) and `code` and **bold** and <b>tag</b>'),
+      'a link and code and bold and tag'
+    );
   });
 });
 
@@ -1158,10 +1174,7 @@ describe('classify', () => {
   });
 
   test('creates when the target does not exist', () => {
-    assert.equal(
-      classify({ targetExists: false, sourceChanged: true, force: false }),
-      'create'
-    );
+    assert.equal(classify({ targetExists: false, sourceChanged: true, force: false }), 'create');
   });
 
   test('treats an untracked existing target as hand-edited', () => {
@@ -1210,7 +1223,7 @@ describe('renderPost', () => {
     assert.ok(out.endsWith('Body.\n'));
   });
 });
-```
+````
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
@@ -1266,25 +1279,60 @@ export const EXCERPT_MAX = 155;
 /** Fixed vocabulary. Order matters: the first match becomes the category. */
 export const TAG_KEYWORDS = {
   Optics: [
-    'optics', 'optical', 'lens', 'laser', 'photonic', 'diffraction', 'polarization',
-    'wavefront', 'aberration', 'coherence', 'spectrometer', 'imaging', 'sensor',
+    'optics',
+    'optical',
+    'lens',
+    'laser',
+    'photonic',
+    'diffraction',
+    'polarization',
+    'wavefront',
+    'aberration',
+    'coherence',
+    'spectrometer',
+    'imaging',
+    'sensor',
   ],
   Hardware: [
-    'hardware', 'pcb', 'enclosure', 'manufacturing', 'tolerance', 'yield', 'mechanical',
-    'tooling', 'validation', 'production', 'module', 'npi',
+    'hardware',
+    'pcb',
+    'enclosure',
+    'manufacturing',
+    'tolerance',
+    'yield',
+    'mechanical',
+    'tooling',
+    'validation',
+    'production',
+    'module',
+    'npi',
   ],
   'Edge AI': [
-    'on-device', 'edge', 'inference', 'quantization', 'model', 'neural', 'ml',
-    'embedded', 'npu', 'real-time',
+    'on-device',
+    'edge',
+    'inference',
+    'quantization',
+    'model',
+    'neural',
+    'ml',
+    'embedded',
+    'npu',
+    'real-time',
   ],
   'System Design': [
-    'architecture', 'trade-off', 'tradeoff', 'framework', 'pipeline', 'interface',
-    'integration', 'spec', 'kpi', 'calibration', 'system',
+    'architecture',
+    'trade-off',
+    'tradeoff',
+    'framework',
+    'pipeline',
+    'interface',
+    'integration',
+    'spec',
+    'kpi',
+    'calibration',
+    'system',
   ],
-  Career: [
-    'career', 'interview', 'promotion', 'mentorship', 'team', 'hiring', 'transition',
-    'leadership',
-  ],
+  Career: ['career', 'interview', 'promotion', 'mentorship', 'team', 'hiring', 'transition', 'leadership'],
 };
 
 const FM_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
@@ -1405,7 +1453,19 @@ export function classify({ targetExists, recordedTargetHash, currentTargetHash, 
 }
 
 /** Fixed key order keeps output byte-stable across runs. */
-export function renderPost({ title, publishDate, updateDate, draft, excerpt, image, imageAlt, category, tags, author, body }) {
+export function renderPost({
+  title,
+  publishDate,
+  updateDate,
+  draft,
+  excerpt,
+  image,
+  imageAlt,
+  category,
+  tags,
+  author,
+  body,
+}) {
   const data = {};
   if (publishDate) data.publishDate = publishDate;
   if (updateDate) data.updateDate = updateDate;
@@ -1580,7 +1640,11 @@ export async function main() {
   }
 
   const counts = actions.reduce((acc, a) => ({ ...acc, [a.action]: (acc[a.action] ?? 0) + 1 }), {});
-  console.log(`\n${Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(', ')}\n`);
+  console.log(
+    `\n${Object.entries(counts)
+      .map(([k, v]) => `${v} ${k}`)
+      .join(', ')}\n`
+  );
 
   if (!write) return;
 
@@ -1627,7 +1691,7 @@ Expected: PASS. All `sync-posts` suites green, `prepare-assets` still green.
 
 Create `artifacts/blog/welcome.md`:
 
-```markdown
+````markdown
 # Why this site exists
 
 I build camera and optical systems — the kind that have to survive contact with mass production. Most of my work sits where optics, imaging pipelines, and increasingly machine learning meet, and the interesting problems are almost never inside one discipline.
@@ -1649,11 +1713,13 @@ The site is a static build. Posts live as plain Markdown, and a small sync scrip
 npm run sync:posts -- --write
 npm run build
 ```
+````
 
 That is the whole workflow. No content management system, no database, nothing that can rot.
 
 If any of this is useful to you, or you want to argue with it, the links are in the footer.
-```
+
+````
 
 Note the deliberately awkward nesting: the file demonstrates the fenced-block case in a real document. Do **not** add frontmatter — the whole point is to exercise inference.
 
@@ -1661,7 +1727,7 @@ Note the deliberately awkward nesting: the file demonstrates the fenced-block ca
 
 ```bash
 npm run sync:posts
-```
+````
 
 Expected: `PREVIEW (pass --write to apply)`, then `+ create    welcome.md`, then `1 create`. Nothing is written yet. Confirm the file is still absent:
 
@@ -1744,12 +1810,12 @@ Turn raw drafts in `artifacts/blog/` into published posts.
 
 ## Commands
 
-| Command | Effect |
-| --- | --- |
-| `npm run sync:posts` | Preview. Writes nothing. Always run this first. |
-| `npm run sync:posts -- --write` | Write to `src/data/post/`. |
+| Command                                 | Effect                                                     |
+| --------------------------------------- | ---------------------------------------------------------- |
+| `npm run sync:posts`                    | Preview. Writes nothing. Always run this first.            |
+| `npm run sync:posts -- --write`         | Write to `src/data/post/`.                                 |
 | `npm run sync:posts -- --write --force` | Also overwrite targets edited by hand since the last sync. |
-| `npm run sync:posts -- --write --prune` | Also delete targets whose source was removed. |
+| `npm run sync:posts -- --write --prune` | Also delete targets whose source was removed.              |
 
 Exit codes: `0` success, `1` conflict, `2` malformed source frontmatter.
 
@@ -1757,15 +1823,15 @@ Exit codes: `0` success, `1` conflict, `2` malformed source frontmatter.
 
 Anything the draft does not already declare in its own frontmatter:
 
-| Field | Source |
-| --- | --- |
-| `title` | First `# heading` outside a code fence, else a humanised filename |
-| `publishDate` | File creation time, else now |
-| `excerpt` | First real paragraph, markdown stripped, ≤ 155 characters |
-| `tags` | Keyword scan of the body against `TAG_KEYWORDS` in the script |
-| `category` | The first matched tag |
-| `draft` | `true` when the filename starts with `_` or contains `draft` |
-| `image` | `<name>.jpg` beside the draft, or in a `<name>/` folder |
+| Field         | Source                                                            |
+| ------------- | ----------------------------------------------------------------- |
+| `title`       | First `# heading` outside a code fence, else a humanised filename |
+| `publishDate` | File creation time, else now                                      |
+| `excerpt`     | First real paragraph, markdown stripped, ≤ 155 characters         |
+| `tags`        | Keyword scan of the body against `TAG_KEYWORDS` in the script     |
+| `category`    | The first matched tag                                             |
+| `draft`       | `true` when the filename starts with `_` or contains `draft`      |
+| `image`       | `<name>.jpg` beside the draft, or in a `<name>/` folder           |
 
 Declare any of these in the draft's own frontmatter to override inference.
 
@@ -1804,10 +1870,12 @@ so hand-edited posts are never silently overwritten."
 Build the publications data module, the filterable page, and the components the home page will later reuse.
 
 **Files:**
+
 - Create: `src/data/metrics.ts`, `src/data/publications.ts`, `src/components/portfolio/Badge.astro`, `src/components/portfolio/FilterBar.astro`, `src/components/portfolio/PublicationList.astro`, `src/pages/publications.astro`
 - Modify: `src/types.d.ts`
 
 **Interfaces:**
+
 - Consumes: the `font-mono` utility (Task 3).
 - Produces:
   - `Metric` type and `HEADLINE_METRICS` from `src/data/metrics.ts` — the four résumé figures, shared by `/publications`, `/cv` (Task 8), and the home page stats strip (Task 9). Task 8 imports this; do not redefine the numbers there.
@@ -1932,8 +2000,7 @@ export const PUBLICATIONS: Publication[] = [
     patentNumber: 'US 18/892,374',
     status: 'Filed',
     tags: ['Optics', 'Hardware', 'Edge AI'],
-    abstract:
-      'Applying single-photon avalanche diode arrays to joint rotational and translational input detection.',
+    abstract: 'Applying single-photon avalanche diode arrays to joint rotational and translational input detection.',
   },
 ];
 
@@ -1990,7 +2057,13 @@ import type { FilterBar as Props } from '~/types';
 const { tags, targetSelector = '[data-filterable]' } = Astro.props;
 ---
 
-<div class="mb-8 flex flex-wrap gap-2" data-filter-bar data-target={targetSelector} role="group" aria-label="Filter by topic">
+<div
+  class="mb-8 flex flex-wrap gap-2"
+  data-filter-bar
+  data-target={targetSelector}
+  role="group"
+  aria-label="Filter by topic"
+>
   <button
     type="button"
     class="cursor-pointer rounded border border-primary bg-primary px-2.5 py-1 font-mono text-xs text-white transition"
@@ -2085,10 +2158,7 @@ const linkFor = (p: Publication) =>
       const doiUrl = linkFor(p);
       return (
         <li
-          class:list={[
-            'border-b border-slate-200 pb-6 last:border-0 dark:border-slate-800',
-            compact ? '' : 'group',
-          ]}
+          class:list={['border-b border-slate-200 pb-6 last:border-0 dark:border-slate-800', compact ? '' : 'group']}
           data-filterable
           data-tags={p.tags.join('|')}
         >
@@ -2186,8 +2256,7 @@ import { HEADLINE_METRICS } from '~/data/metrics';
 
 const metadata = {
   title: 'Publications',
-  description:
-    'Peer-reviewed papers, refereed proceedings, and patents in optics, imaging, and hardware systems.',
+  description: 'Peer-reviewed papers, refereed proceedings, and patents in optics, imaging, and hardware systems.',
 };
 
 const stats = HEADLINE_METRICS;
@@ -2204,7 +2273,9 @@ const sorted = [...PUBLICATIONS].sort((a, b) => b.year - a.year);
       classes={{ container: 'max-w-3xl', title: 'text-4xl md:text-5xl ', subtitle: 'text-lg' }}
     />
 
-    <dl class="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 md:grid-cols-4 dark:border-slate-800 dark:bg-slate-800">
+    <dl
+      class="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 md:grid-cols-4 dark:border-slate-800 dark:bg-slate-800"
+    >
       {
         stats.map((stat) => (
           <div class="bg-page px-5 py-4">
@@ -2272,10 +2343,12 @@ authoritative full list until then."
 Add the project content collection, its card grid, and the case-study subpages the spec calls for.
 
 **Files:**
+
 - Modify: `src/content.config.ts`, `src/types.d.ts`
 - Create: `src/content/projects/*.mdx` (3 seeds), `src/components/portfolio/ProjectGrid.astro`, `src/pages/projects/index.astro`, `src/pages/projects/[slug].astro`
 
 **Interfaces:**
+
 - Consumes: `Badge.astro` (Task 5), `font-mono` (Task 3).
 - Produces: the `project` collection (id = filename without extension) and `<ProjectGrid items columns? />` — Task 9 reuses it on the home page with `items={featured}`.
 
@@ -2520,7 +2593,9 @@ const columnsClass = getColumnsClass(columns, '');
 
           <div class="flex flex-1 flex-col p-6">
             <div class="mb-3 flex flex-wrap items-center gap-2">
-              {project.status && <Badge label={project.status} tone={project.status === 'shipped' ? 'primary' : 'default'} />}
+              {project.status && (
+                <Badge label={project.status} tone={project.status === 'shipped' ? 'primary' : 'default'} />
+              )}
               <span class="font-mono text-xs text-muted">{project.year}</span>
               {project.role && <span class="font-mono text-xs text-muted">· {project.role}</span>}
             </div>
@@ -2531,9 +2606,7 @@ const columnsClass = getColumnsClass(columns, '');
             {showComponents && project.components.length > 0 && (
               <dl class="mt-4 border-t border-slate-200 pt-4 dark:border-slate-800">
                 <dt class="font-mono text-[11px] uppercase tracking-wider text-muted">Components</dt>
-                <dd class="mt-1 font-mono text-xs leading-relaxed text-default">
-                  {project.components.join(' · ')}
-                </dd>
+                <dd class="mt-1 font-mono text-xs leading-relaxed text-default">{project.components.join(' · ')}</dd>
               </dl>
             )}
 
@@ -2548,14 +2621,12 @@ const columnsClass = getColumnsClass(columns, '');
               <Icon name="tabler:arrow-right" class="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
             </span>
 
-            {
-              project.repo && (
-                <span class="mt-2 inline-flex items-center gap-1 font-mono text-xs text-muted">
-                  <Icon name="tabler:brand-github" class="h-3.5 w-3.5" />
-                  {project.repo.replace(/^https?:\/\/(www\.)?github\.com\//, '')}
-                </span>
-              )
-            }
+            {project.repo && (
+              <span class="mt-2 inline-flex items-center gap-1 font-mono text-xs text-muted">
+                <Icon name="tabler:brand-github" class="h-3.5 w-3.5" />
+                {project.repo.replace(/^https?:\/\/(www\.)?github\.com\//, '')}
+              </span>
+            )}
           </div>
         </a>
       </li>
@@ -2649,13 +2720,15 @@ const metadata = { title, description: summary };
     {role && <span class="font-mono text-xs text-muted">· {role}</span>}
   </div>
 
-  {stack.length > 0 && (
-    <div class="mb-8 flex flex-wrap gap-2">
-      {stack.map((tech) => (
-        <Badge label={tech} />
-      ))}
-    </div>
-  )}
+  {
+    stack.length > 0 && (
+      <div class="mb-8 flex flex-wrap gap-2">
+        {stack.map((tech) => (
+          <Badge label={tech} />
+        ))}
+      </div>
+    )
+  }
 
   <Content />
 
@@ -2719,10 +2792,12 @@ carry stack tags, hardware components, and a link to the case study."
 Build the gallery. The template's `Gallery` widget hard-crops to 4:3, which would cut apart portrait and landscape compositions — this needs a masonry grid that preserves native aspect ratios.
 
 **Files:**
+
 - Create: `src/data/photography.ts`, `src/components/portfolio/PhotoGrid.astro`, `src/pages/photography.astro`
 - Modify: `src/types.d.ts`
 
 **Interfaces:**
+
 - Consumes: `src/assets/images/photography/<category>/*.jpg` (Task 2).
 - Produces: `<PhotoGrid groups />`, and `PHOTO_OVERRIDES` keyed by filename.
 
@@ -2960,10 +3035,9 @@ const metadata = {
 // Every image under src/assets/images/photography/ is picked up
 // automatically. Dropping a new file into a category folder and rebuilding
 // is the entire workflow.
-const modules = import.meta.glob<{ default: ImageMetadata }>(
-  '~/assets/images/photography/**/*.{jpg,jpeg,png,webp}',
-  { eager: true }
-);
+const modules = import.meta.glob<{ default: ImageMetadata }>('~/assets/images/photography/**/*.{jpg,jpeg,png,webp}', {
+  eager: true,
+});
 
 const byCategory = new Map<string, PhotoGroup['photos']>();
 
@@ -3056,10 +3130,12 @@ a category folder."
 Render the résumé as a web page, with the print stylesheet and the PDF download the spec requires.
 
 **Files:**
+
 - Create: `src/data/cv.ts`, `src/components/portfolio/CVEntry.astro`, `src/pages/cv.astro`, `public/resume.pdf`
 - Modify: `src/types.d.ts`
 
 **Interfaces:**
+
 - Consumes: `Badge.astro` (Task 5) and `HEADLINE_METRICS` from `src/data/metrics.ts` (Task 5) — the CV page renders the same four figures, imported, not restated.
 - Produces: `src/data/cv.ts` exporting `CV_SUMMARY`, `CV_EXPERIENCE`, `CV_EDUCATION`, `CV_PATENTS`, `CV_LINKS`, and the `CVEntryData` / `CVEducation` / `CVPatent` types; `<CVEntry entry />`. Task 9 links to `/cv` from the hero and uses `/cv` in the navigation.
 
@@ -3184,28 +3260,44 @@ export const CV_EDUCATION: CVEducation[] = [
     org: 'University of Central Florida, CREOL',
     start: '2012.08',
     end: '2016.10',
-    detail: 'Advisors: Eric W. Van Stryland and David J. Hagan. Dissertation: Ultrafast Mechanisms of Nonlinear Refraction and Two-photon Photochromism.',
+    detail:
+      'Advisors: Eric W. Van Stryland and David J. Hagan. Dissertation: Ultrafast Mechanisms of Nonlinear Refraction and Two-photon Photochromism.',
   },
   {
     degree: 'M.S. in Electrical Engineering',
     org: 'Case Western Reserve University, EECS',
     start: '2010.08',
     end: '2012.08',
-    detail: 'Advisor: Hongping Zhao. Thesis: Analysis of Light Extraction Efficiency Enhancement for Deep Ultraviolet and Visible Light-Emitting Diodes with III-Nitride Micro Domes.',
+    detail:
+      'Advisor: Hongping Zhao. Thesis: Analysis of Light Extraction Efficiency Enhancement for Deep Ultraviolet and Visible Light-Emitting Diodes with III-Nitride Micro Domes.',
   },
   {
     degree: 'B.S. in Measuring and Controlling Technology and Instruments',
     org: 'Tianjin University',
     start: '2006.08',
     end: '2010.08',
-    detail: 'Precision Instruments and Optoelectronics Engineering. Thesis: Design and optimization of a mobile LED backlight module.',
+    detail:
+      'Precision Instruments and Optoelectronics Engineering. Thesis: Design and optimization of a mobile LED backlight module.',
   },
 ];
 
 export const CV_PATENTS: CVPatent[] = [
-  { title: 'Cylindrical Retroreflector Array for Rotation Tracking', number: 'US 2023/0086536 A1', status: 'Issued', date: '2023.03' },
-  { title: 'Optical Sensing of Translational and Rotational Shaft Movements', number: 'US 63/541,246', status: 'Filed' },
-  { title: 'Single Photon Avalanche Diodes for Rotational and Translational Input Detection', number: 'US 18/892,374', status: 'Filed' },
+  {
+    title: 'Cylindrical Retroreflector Array for Rotation Tracking',
+    number: 'US 2023/0086536 A1',
+    status: 'Issued',
+    date: '2023.03',
+  },
+  {
+    title: 'Optical Sensing of Translational and Rotational Shaft Movements',
+    number: 'US 63/541,246',
+    status: 'Filed',
+  },
+  {
+    title: 'Single Photon Avalanche Diodes for Rotational and Translational Input Detection',
+    number: 'US 18/892,374',
+    status: 'Filed',
+  },
 ];
 
 export const CV_LINKS = {
@@ -3236,7 +3328,9 @@ const { entry } = Astro.props;
 const period = entry.current ? `${entry.start} — Present` : `${entry.start} — ${entry.end}`;
 ---
 
-<div class="grid gap-1 border-b border-slate-200 py-6 last:border-0 md:grid-cols-[10rem_1fr] md:gap-6 dark:border-slate-800">
+<div
+  class="grid gap-1 border-b border-slate-200 py-6 last:border-0 md:grid-cols-[10rem_1fr] md:gap-6 dark:border-slate-800"
+>
   <p class="font-mono text-xs leading-6 whitespace-nowrap text-muted">{period}</p>
 
   <div>
@@ -3288,22 +3382,44 @@ const metadata = {
       <p class="mt-2 font-mono text-sm text-primary">Optical Systems · Sensing Hardware · Imaging</p>
 
       <p class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted">
-        <span class="inline-flex items-center gap-1"><Icon name="tabler:map-pin" class="h-3.5 w-3.5" />{CV_LINKS.location}</span>
+        <span class="inline-flex items-center gap-1"
+          ><Icon name="tabler:map-pin" class="h-3.5 w-3.5" />{CV_LINKS.location}</span
+        >
         <a href={`mailto:${CV_LINKS.email}`} class="inline-flex items-center gap-1 hover:text-primary">
           <Icon name="tabler:mail" class="h-3.5 w-3.5" />{CV_LINKS.email}
         </a>
       </p>
 
       <div class="mt-6 flex flex-wrap gap-3">
-        <Button variant="primary" text="Download PDF" href={CV_LINKS.resumePdf} target="_blank" icon="tabler:download" />
-        <Button variant="secondary" text="LinkedIn" href={CV_LINKS.linkedin} target="_blank" icon="tabler:brand-linkedin" />
-        <Button variant="secondary" text="Google Scholar" href={CV_LINKS.scholar} target="_blank" icon="tabler:school" />
+        <Button
+          variant="primary"
+          text="Download PDF"
+          href={CV_LINKS.resumePdf}
+          target="_blank"
+          icon="tabler:download"
+        />
+        <Button
+          variant="secondary"
+          text="LinkedIn"
+          href={CV_LINKS.linkedin}
+          target="_blank"
+          icon="tabler:brand-linkedin"
+        />
+        <Button
+          variant="secondary"
+          text="Google Scholar"
+          href={CV_LINKS.scholar}
+          target="_blank"
+          icon="tabler:school"
+        />
       </div>
     </header>
 
     <p class="mb-10 text-default text-pretty">{CV_SUMMARY}</p>
 
-    <dl class="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 md:grid-cols-4 dark:border-slate-800 dark:bg-slate-800">
+    <dl
+      class="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 md:grid-cols-4 dark:border-slate-800 dark:bg-slate-800"
+    >
       {
         HEADLINE_METRICS.map((metric) => (
           <div class="bg-page px-5 py-4">
@@ -3312,7 +3428,6 @@ const metadata = {
           </div>
         ))
       }
-
     </dl>
 
     <section class="mb-12">
@@ -3325,7 +3440,9 @@ const metadata = {
       {
         CV_EDUCATION.map((item) => (
           <div class="grid gap-1 border-b border-slate-200 py-6 last:border-0 md:grid-cols-[10rem_1fr] md:gap-6 dark:border-slate-800">
-            <p class="font-mono text-xs leading-6 whitespace-nowrap text-muted">{item.start} — {item.end}</p>
+            <p class="font-mono text-xs leading-6 whitespace-nowrap text-muted">
+              {item.start} — {item.end}
+            </p>
             <div>
               <h3 class="font-heading text-lg font-semibold text-heading">{item.degree}</h3>
               <p class="text-default">{item.org}</p>
@@ -3343,7 +3460,10 @@ const metadata = {
           <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-200 py-4 last:border-0 dark:border-slate-800">
             <div>
               <h3 class="font-semibold text-heading">{patent.title}</h3>
-              <p class="font-mono text-xs text-muted">{patent.number}{patent.date ? ` · ${patent.date}` : ''}</p>
+              <p class="font-mono text-xs text-muted">
+                {patent.number}
+                {patent.date ? ` · ${patent.date}` : ''}
+              </p>
             </div>
             <Badge label={patent.status} tone={patent.status === 'Issued' ? 'primary' : 'default'} />
           </div>
@@ -3443,10 +3563,12 @@ owner's original résumé PDF served unmodified."
 Assemble the home page from the components the previous tasks built, and install the real header and footer navigation.
 
 **Files:**
+
 - Create: `src/data/socials.ts`, `src/components/portfolio/SocialLinks.astro`, `artifacts/socials.md`, `artifacts/resume.md`
 - Modify: `src/pages/index.astro`, `src/navigation.ts`, `src/types.d.ts`
 
 **Interfaces:**
+
 - Consumes: `ProjectGrid` (Task 6), `PublicationList` with `variant="compact"` (Task 5), `HEADLINE_METRICS` from `src/data/metrics.ts` (Task 5), `SOCIALS` defined in this task, the `post` collection from Task 4.
 - Produces: `<SocialLinks size? />`, used by the home page, footer, and (optionally) the CV page.
 
@@ -3477,7 +3599,11 @@ import type { SocialLink } from '~/types';
 /** Order is deliberate: code first, then scholarly, then professional, then social. */
 export const SOCIALS: SocialLink[] = [
   { label: 'GitHub', href: 'https://github.com/pengzhao-ai', icon: 'tabler:brand-github' },
-  { label: 'Google Scholar', href: 'https://scholar.google.com/citations?user=w0H4EiQAAAAJ&hl=en&authuser=1', icon: 'tabler:school' },
+  {
+    label: 'Google Scholar',
+    href: 'https://scholar.google.com/citations?user=w0H4EiQAAAAJ&hl=en&authuser=1',
+    icon: 'tabler:school',
+  },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/peng-zhao-nlo/', icon: 'tabler:brand-linkedin' },
   { label: 'ORCID', href: 'https://orcid.org/0000-0001-6370-4206', icon: 'tabler:atom' },
   { label: 'X', href: 'https://x.com/pengzha0', icon: 'tabler:brand-x' },
@@ -3613,57 +3739,52 @@ const featuredPublications = PUBLICATIONS.filter((publication) => publication.fe
     title="Peng Zhao"
   >
     <Fragment slot="subtitle">
-      Camera and optical systems engineer. I design the optics, sensors, and imaging pipelines behind products
-      that have shipped at scale — and the frameworks that let teams predict how they will perform before
-      anything is built.
+      Camera and optical systems engineer. I design the optics, sensors, and imaging pipelines behind products that have
+      shipped at scale — and the frameworks that let teams predict how they will perform before anything is built.
     </Fragment>
     <Fragment slot="actions">
       <div class="flex flex-col gap-4 sm:flex-row">
-        <a
-          href={getPermalink('/projects')}
-          class="btn btn-primary w-full sm:w-auto"
-        >
-          View projects
-        </a>
+        <a href={getPermalink('/projects')} class="btn btn-primary w-full sm:w-auto"> View projects </a>
         <a href={getPermalink('/cv')} class="btn btn-secondary w-full sm:w-auto">Download CV</a>
       </div>
       <SocialLinks class="mt-8 justify-center" />
     </Fragment>
   </Hero>
 
-  <Stats
-    countUp
-    stats={HEADLINE_METRICS.map((metric) => ({ amount: metric.value, title: metric.label }))}
-  />
+  <Stats countUp stats={HEADLINE_METRICS.map((metric) => ({ amount: metric.value, title: metric.label }))} />
 
-  {featuredProjects.length > 0 && (
-    <WidgetWrapper containerClass="max-w-7xl mx-auto">
-      <Headline
-        tagline="Projects"
-        title="Systems that shipped"
-        subtitle="Optical and hardware architectures taken from concept through mass production."
-        classes={{ container: 'max-w-3xl' }}
-      />
-      <ProjectGrid items={featuredProjects} columns={3} showComponents={false} />
-      <div class="mt-10 text-center">
-        <a href={getPermalink('/projects')} class="btn btn-secondary">All projects</a>
-      </div>
-    </WidgetWrapper>
-  )}
+  {
+    featuredProjects.length > 0 && (
+      <WidgetWrapper containerClass="max-w-7xl mx-auto">
+        <Headline
+          tagline="Projects"
+          title="Systems that shipped"
+          subtitle="Optical and hardware architectures taken from concept through mass production."
+          classes={{ container: 'max-w-3xl' }}
+        />
+        <ProjectGrid items={featuredProjects} columns={3} showComponents={false} />
+        <div class="mt-10 text-center">
+          <a href={getPermalink('/projects')} class="btn btn-secondary">
+            All projects
+          </a>
+        </div>
+      </WidgetWrapper>
+    )
+  }
 
-  {featuredPublications.length > 0 && (
-    <WidgetWrapper containerClass="max-w-4xl mx-auto">
-      <Headline
-        tagline="Publications"
-        title="Selected papers and patents"
-        classes={{ container: 'max-w-3xl' }}
-      />
-      <PublicationList items={featuredPublications} variant="compact" />
-      <div class="mt-10 text-center">
-        <a href={getPermalink('/publications')} class="btn btn-secondary">All publications</a>
-      </div>
-    </WidgetWrapper>
-  )}
+  {
+    featuredPublications.length > 0 && (
+      <WidgetWrapper containerClass="max-w-4xl mx-auto">
+        <Headline tagline="Publications" title="Selected papers and patents" classes={{ container: 'max-w-3xl' }} />
+        <PublicationList items={featuredPublications} variant="compact" />
+        <div class="mt-10 text-center">
+          <a href={getPermalink('/publications')} class="btn btn-secondary">
+            All publications
+          </a>
+        </div>
+      </WidgetWrapper>
+    )
+  }
 
   <BlogLatestPosts
     title="Writing"
@@ -3739,11 +3860,11 @@ export const footerData = {
     icon: social.icon,
     href: social.href,
   })),
-  footNote: `&copy; ${new Date().getFullYear()} Peng Zhao. Built with <a class="text-blue-600 underline dark:text-muted" href="https://github.com/arthelokyo/astrowind">AstroWind</a> (MIT).`,
+  footNote: `&copy; ${new Date().getFullYear()} Peng Zhao. Built with AstroWind (MIT).`,
 };
 ```
 
-The AstroWind attribution in `footNote` and `LICENSE.md` satisfies the MIT licence. Do not remove it.
+The AstroWind attribution in `footNote` and `LICENSE.md` satisfies the MIT licence. Do not remove it. Keep the `footNote` credit text-only: an anchor to the upstream repository would put the string `arthelokyo` into every rendered page, and Task 11's `FORBIDDEN` check treats that string as a leaked template identifier.
 
 - [ ] **Step 7: Verify the build**
 
@@ -3805,10 +3926,12 @@ footer carry the six-route navigation."
 Make the repository self-describing, so adding content later needs no archaeology.
 
 **Files:**
+
 - Modify: `README.md`, `AGENTS.md`
 - Create: `.agents/skills/add-publication.md`, `.agents/skills/add-project.md`, `.agents/skills/add-photograph.md`
 
 **Interfaces:**
+
 - Consumes: everything built so far.
 - Produces: no code.
 
@@ -3841,14 +3964,14 @@ npm run build && npm run verify:build   # build, then assert the output invarian
 
 Each content type has one place to put things. Nothing requires editing a page.
 
-| To add a… | Do this | Then |
-| --- | --- | --- |
-| Blog post | Drop a `.md` file in `artifacts/blog/` | `npm run sync:posts` to preview, `npm run sync:posts -- --write` to publish |
-| Project | Add an `.mdx` file in `src/content/projects/` | nothing — it appears on `/projects` |
-| Publication | Append an object to `PUBLICATIONS` in `src/data/publications.ts` | nothing — it appears on `/publications` |
-| Photograph | Drop a `.jpg` in `src/assets/images/photography/<category>/` | `npm run prepare:assets` if it is a camera original, then rebuild |
-| CV entry | Edit `src/data/cv.ts` | nothing — `/cv` re-renders |
-| Social link | Edit `src/data/socials.ts` | nothing — header, footer, and home all read it |
+| To add a…   | Do this                                                          | Then                                                                        |
+| ----------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Blog post   | Drop a `.md` file in `artifacts/blog/`                           | `npm run sync:posts` to preview, `npm run sync:posts -- --write` to publish |
+| Project     | Add an `.mdx` file in `src/content/projects/`                    | nothing — it appears on `/projects`                                         |
+| Publication | Append an object to `PUBLICATIONS` in `src/data/publications.ts` | nothing — it appears on `/publications`                                     |
+| Photograph  | Drop a `.jpg` in `src/assets/images/photography/<category>/`     | `npm run prepare:assets` if it is a camera original, then rebuild           |
+| CV entry    | Edit `src/data/cv.ts`                                            | nothing — `/cv` re-renders                                                  |
+| Social link | Edit `src/data/socials.ts`                                       | nothing — header, footer, and home all read it                              |
 
 `.agents/skills/` documents each workflow in more detail, in a format AI coding
 assistants can follow.
@@ -3884,7 +4007,7 @@ Site content © Peng Zhao. Template: [AstroWind](https://github.com/arthelokyo/a
 
 Append a section to `AGENTS.md`, after the "Architecture" section:
 
-````markdown
+```markdown
 ## Site-specific conventions
 
 This repository is an AstroWind clone customised as a personal portfolio. The template
@@ -3892,14 +4015,14 @@ conventions above still apply; these are the additions.
 
 ### Content lives in data modules, not in pages
 
-| Content | Source of truth |
-| --- | --- |
-| Blog posts | `artifacts/blog/*.md` → generated into `src/data/post/` |
-| Projects | `src/content/projects/*.mdx` (content collection, zod-typed) |
-| Publications | `src/data/publications.ts` |
-| CV | `src/data/cv.ts` |
-| Social links | `src/data/socials.ts` |
-| Photography | `src/assets/images/photography/<category>/` + overrides in `src/data/photography.ts` |
+| Content      | Source of truth                                                                      |
+| ------------ | ------------------------------------------------------------------------------------ |
+| Blog posts   | `artifacts/blog/*.md` → generated into `src/data/post/`                              |
+| Projects     | `src/content/projects/*.mdx` (content collection, zod-typed)                         |
+| Publications | `src/data/publications.ts`                                                           |
+| CV           | `src/data/cv.ts`                                                                     |
+| Social links | `src/data/socials.ts`                                                                |
+| Photography  | `src/assets/images/photography/<category>/` + overrides in `src/data/photography.ts` |
 
 **Never edit `src/data/post/` directly** — it is generated by `scripts/sync-posts.mjs`, which will report a
 conflict against a hand edit. Edit the draft in `artifacts/blog/` instead.
@@ -3909,15 +4032,15 @@ conflict against a hand edit. Edit the draft in `artifacts/blog/` instead.
 `src/components/portfolio/` holds components specific to this site; `src/components/widgets/` and
 `src/components/ui/` are the template's and should be preferred when one fits.
 
-| Component | Use |
-| --- | --- |
-| `Badge.astro` | Mono chips for tags, statuses, and venue types |
-| `ProjectGrid.astro` | Project cards — stack tags, hardware components, case-study link |
-| `PublicationList.astro` | Publication rows; `variant="compact"` for the home page |
-| `FilterBar.astro` | Progressive-enhancement tag filter over `[data-filterable]` |
-| `PhotoGrid.astro` | Masonry gallery preserving native aspect ratios, with a lightbox |
-| `CVEntry.astro` | A dense résumé row |
-| `SocialLinks.astro` | Social icon row, driven by `src/data/socials.ts` |
+| Component               | Use                                                              |
+| ----------------------- | ---------------------------------------------------------------- |
+| `Badge.astro`           | Mono chips for tags, statuses, and venue types                   |
+| `ProjectGrid.astro`     | Project cards — stack tags, hardware components, case-study link |
+| `PublicationList.astro` | Publication rows; `variant="compact"` for the home page          |
+| `FilterBar.astro`       | Progressive-enhancement tag filter over `[data-filterable]`      |
+| `PhotoGrid.astro`       | Masonry gallery preserving native aspect ratios, with a lightbox |
+| `CVEntry.astro`         | A dense résumé row                                               |
+| `SocialLinks.astro`     | Social icon row, driven by `src/data/socials.ts`                 |
 
 ### Design tokens
 
@@ -3935,13 +4058,13 @@ runner is used deliberately. Add tests for any new logic in `scripts/`.
 - All committed images must have EXIF stripped — the repository is public and camera originals carry GPS.
 - No phone number may appear in any rendered page.
 - `public/resume.pdf` is the owner's original and must remain byte-identical.
-````
+```
 
 - [ ] **Step 3: Write the three content skills**
 
 Create `.agents/skills/add-publication.md`:
 
-```markdown
+````markdown
 # Add a Publication
 
 ## Steps
@@ -3967,6 +4090,7 @@ Create `.agents/skills/add-publication.md`:
   featured: true,                 // optional — surfaces on the home page
 }
 ```
+````
 
 ## Rules
 
@@ -3976,7 +4100,8 @@ Create `.agents/skills/add-publication.md`:
 - Omit `pdf` and `code` entirely rather than passing an empty string.
 - Setting `featured: true` on at least one entry makes the "Selected papers and
   patents" section appear on the home page. With none featured, the section is hidden.
-```
+
+````
 
 Create `.agents/skills/add-project.md`:
 
@@ -4008,7 +4133,7 @@ imageAlt: 'What the image shows'
 featured: true                    # show on the home page
 weight: 10                        # sort order, higher first
 ---
-```
+````
 
 ## Rules
 
@@ -4018,7 +4143,8 @@ weight: 10                        # sort order, higher first
   project cards. Include the real parts where they are public knowledge.
 - Write only at the level of detail already public in the owner's résumé. No
   employer-internal measurements, yields, or unreleased products.
-```
+
+````
 
 Create `.agents/skills/add-photograph.md`:
 
@@ -4057,7 +4183,7 @@ export const PHOTO_OVERRIDES: Record<string, PhotoOverride> = {
     weight: 10,
   },
 };
-```
+````
 
 Without an override, a photograph still renders — it uses the filename for its
 alt text. Overrides only add what a filename cannot express.
@@ -4068,13 +4194,14 @@ Camera originals carry GPS coordinates and run to tens of megabytes. The
 `.gitignore` blocks them under `artifacts/`, and the optimized copies under
 `src/assets/images/` are what the site serves. Do not add `artifacts/` binaries
 with `git add -f`.
-```
+
+````
 
 - [ ] **Step 4: Verify Prettier is happy with the new Markdown**
 
 ```bash
 npm run check:prettier
-```
+````
 
 Expected: pass. If Prettier reformats the Markdown files, run `npm run fix` and commit the result — the repo is Prettier-clean and must stay so.
 
@@ -4103,10 +4230,12 @@ architecture, and add skills for the three other content types."
 Add the deploy workflow and an automated check over the built output, then prove the whole spec holds.
 
 **Files:**
+
 - Create: `.github/workflows/deploy.yml`, `scripts/verify-build.mjs`
 - Modify: nothing
 
 **Interfaces:**
+
 - Consumes: `dist/` produced by `npm run build`, and `public/resume.pdf` (Task 8).
 - Produces: `npm run verify:build`, exiting non-zero on any failed assertion.
 
@@ -4213,12 +4342,12 @@ const shippedPdf = path.join(DIST, 'resume.pdf');
 if (await exists(originalPdf)) {
   const hash = (buf) => createHash('sha256').update(buf).digest('hex');
   const [a, b] = await Promise.all([readFile(originalPdf), readFile(shippedPdf)]);
-  check(hash(a) === hash(b), 'public/resume.pdf differs from the owner\'s original PDF');
+  check(hash(a) === hash(b), "public/resume.pdf differs from the owner's original PDF");
 }
 
 // 7. The site name reached the metadata.
 const home = await readFile(path.join(DIST, 'index.html'), 'utf8');
-check(home.includes('Peng Zhao'), 'home page does not contain the owner\'s name');
+check(home.includes('Peng Zhao'), "home page does not contain the owner's name");
 
 if (failures.length) {
   console.error(`\n✗ ${failures.length} verification failure(s):\n`);
@@ -4391,9 +4520,11 @@ Two actions remain, and both belong to the owner:
 
 1. **Set Pages source.** Repository → Settings → Pages → Source = **GitHub Actions**. Alternatively, with an
    admin-scoped `gh` token:
+
    ```bash
    gh api -X PUT repos/pengzhao-ai/pengzhao-ai.github.io/pages -f build_type=workflow
    ```
+
    Without this, `deploy-pages` fails after a successful build.
 
 2. **Merge `feat/portfolio-skeleton` into `main`.** The merge is what triggers the first production deploy.
@@ -4425,6 +4556,3 @@ After the plan is executed, these are the things only you can decide or provide:
   rather than the `.docx`.
 - **Your Google Search Console verification ID**, once you register the site. `src/config.yaml` currently has none.
 - **The 知乎 link**, if you want it in the footer — it was marked TBD in the source notes.
-
-
-

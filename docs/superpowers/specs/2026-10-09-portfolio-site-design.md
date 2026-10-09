@@ -46,30 +46,30 @@ Node >= 22.22.3) with the template's demo content intact. `node_modules` is not 
 
 Relevant template capabilities confirmed present and reused:
 
-| Capability | Location |
-| --- | --- |
-| Theming via CSS variables (light + dark) | `src/components/CustomStyles.astro` |
-| Tailwind v4 tokens and utilities | `src/assets/styles/tailwind.css` |
-| Native Fonts API (Inter already wired) | `astro.config.ts` `fonts[]`, injected at `src/layouts/Layout.astro:35` |
-| Post content collection | `src/content.config.ts` (`glob` loader, `src/data/post`) |
-| Blog routes, taxonomy, RSS | `src/pages/[...blog]/`, `src/pages/rss.xml.ts` |
-| Image component (Sharp + responsive srcset) | `src/components/common/Image.astro` |
-| Widgets: `Hero`, `Stats`, `Features`, `Content`, `Timeline`, `BlogLatestPosts`, `CallToAction` | `src/components/widgets/` |
-| Gallery with native-`<dialog>` lightbox | `src/components/widgets/Gallery.astro` |
-| CI running `npm run check` + `npm run build` | `.github/workflows/actions.yaml` |
+| Capability                                                                                     | Location                                                               |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Theming via CSS variables (light + dark)                                                       | `src/components/CustomStyles.astro`                                    |
+| Tailwind v4 tokens and utilities                                                               | `src/assets/styles/tailwind.css`                                       |
+| Native Fonts API (Inter already wired)                                                         | `astro.config.ts` `fonts[]`, injected at `src/layouts/Layout.astro:35` |
+| Post content collection                                                                        | `src/content.config.ts` (`glob` loader, `src/data/post`)               |
+| Blog routes, taxonomy, RSS                                                                     | `src/pages/[...blog]/`, `src/pages/rss.xml.ts`                         |
+| Image component (Sharp + responsive srcset)                                                    | `src/components/common/Image.astro`                                    |
+| Widgets: `Hero`, `Stats`, `Features`, `Content`, `Timeline`, `BlogLatestPosts`, `CallToAction` | `src/components/widgets/`                                              |
+| Gallery with native-`<dialog>` lightbox                                                        | `src/components/widgets/Gallery.astro`                                 |
+| CI running `npm run check` + `npm run build`                                                   | `.github/workflows/actions.yaml`                                       |
 
 Dependencies already present that the new scripts rely on: `sharp` (image processing), `limax` (slug
 transliteration), `js-yaml` (frontmatter parsing). **No new runtime dependencies are introduced by this work.**
 
 ### Artifact audit (source material)
 
-| Brief expected | Actually present | Handling |
-| --- | --- | --- |
-| `artifacts/resume.md` | `Peng Zhao Resume - 02062026.docx` and `.pdf` | Text extracted from the `.docx`; not re-derived |
-| `artifacts/socials.md` | `artifacts/socialLinks.rtf` | Text extracted from the `.rtf` |
-| `artifacts/blog/*.md` | directory empty | Pipeline built; one sample post authored (see §7) |
-| `artifacts/photography/` | 9 JPGs, 6–20 MB, ~129 MB total, 2660–6000 px | Downscaled copies committed; originals gitignored (§8) |
-| `artifacts/profile.jpg` | `artifacts/Profile.jpg`, 1792×2400, 2.7 MB | Downscaled copy committed |
+| Brief expected           | Actually present                              | Handling                                               |
+| ------------------------ | --------------------------------------------- | ------------------------------------------------------ |
+| `artifacts/resume.md`    | `Peng Zhao Resume - 02062026.docx` and `.pdf` | Text extracted from the `.docx`; not re-derived        |
+| `artifacts/socials.md`   | `artifacts/socialLinks.rtf`                   | Text extracted from the `.rtf`                         |
+| `artifacts/blog/*.md`    | directory empty                               | Pipeline built; one sample post authored (see §7)      |
+| `artifacts/photography/` | 9 JPGs, 6–20 MB, ~129 MB total, 2660–6000 px  | Downscaled copies committed; originals gitignored (§8) |
+| `artifacts/profile.jpg`  | `artifacts/Profile.jpg`, 1792×2400, 2.7 MB    | Downscaled copy committed                              |
 
 Photography categories on disk: `landscape` (4), `wildlife` (4), `macro` (1), `protrait` (1 — misspelled),
 `streets` (0 — empty).
@@ -84,17 +84,17 @@ LinkedIn `peng-zhao-nlo`, X `@pengzha0`; 知乎 marked TBD by the owner and ther
 
 ## 3. Decisions log
 
-| # | Decision | Choice | Rationale |
-| --- | --- | --- | --- |
-| D1 | Architecture | **Typed data modules + targeted components** (Approach A) | Build-time resolution, full type-safety, filters are plain array operations, matches how AstroWind widgets already consume typed arrays |
-| D2 | Blog pipeline scope | Build pipeline **and** author one sample post | Pipeline is proven end-to-end and `/blog` is not empty at launch |
-| D3 | Photo originals | Commit downscaled copies; keep originals out of git | 129 MB of binaries would permanently bloat history and slow every deploy |
-| D4 | `artifacts/` gitignore scope | Ignore **binaries only**; track text sources | Blog drafts exist nowhere else; a full ignore would make them laptop-only |
-| D5 | Publications data | Typed schema seeded with **the 3 patents only** | No structured publication list exists. The 3 patents are verifiable from the owner's résumé; the 13 journals and 8 proceedings are not, so they are left for the owner rather than guessed |
-| D6 | Demo content | Delete all demo pages, posts, and wrong-host deploy configs | Keeps the sitemap and build output free of unrelated marketing pages |
-| D7 | Projects data shape | **Content collection** (`src/content/projects/*.mdx`), superseding the `src/data/projects.ts` mentioned in Approach A | Projects are the one type needing long-form bodies with images; a TS/ MDX split would create two sources of truth. Zod-typed frontmatter preserves type-safety |
-| D8 | Photography layout | Bespoke `PhotoGrid`, not the template's `Gallery` widget | `Gallery` hard-crops to 4:3, which destroys portrait and landscape compositions |
-| D9 | Résumé PDF | Ship `artifacts/Peng Zhao Resume - 02062026.pdf` unmodified as `public/resume.pdf`; **omit the phone number from the web CV page** | Owner's explicit choice. The PDF is already a document he distributes; the web page need not repeat the number |
+| #   | Decision                     | Choice                                                                                                                             | Rationale                                                                                                                                                                                  |
+| --- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| D1  | Architecture                 | **Typed data modules + targeted components** (Approach A)                                                                          | Build-time resolution, full type-safety, filters are plain array operations, matches how AstroWind widgets already consume typed arrays                                                    |
+| D2  | Blog pipeline scope          | Build pipeline **and** author one sample post                                                                                      | Pipeline is proven end-to-end and `/blog` is not empty at launch                                                                                                                           |
+| D3  | Photo originals              | Commit downscaled copies; keep originals out of git                                                                                | 129 MB of binaries would permanently bloat history and slow every deploy                                                                                                                   |
+| D4  | `artifacts/` gitignore scope | Ignore **binaries only**; track text sources                                                                                       | Blog drafts exist nowhere else; a full ignore would make them laptop-only                                                                                                                  |
+| D5  | Publications data            | Typed schema seeded with **the 3 patents only**                                                                                    | No structured publication list exists. The 3 patents are verifiable from the owner's résumé; the 13 journals and 8 proceedings are not, so they are left for the owner rather than guessed |
+| D6  | Demo content                 | Delete all demo pages, posts, and wrong-host deploy configs                                                                        | Keeps the sitemap and build output free of unrelated marketing pages                                                                                                                       |
+| D7  | Projects data shape          | **Content collection** (`src/content/projects/*.mdx`), superseding the `src/data/projects.ts` mentioned in Approach A              | Projects are the one type needing long-form bodies with images; a TS/ MDX split would create two sources of truth. Zod-typed frontmatter preserves type-safety                             |
+| D8  | Photography layout           | Bespoke `PhotoGrid`, not the template's `Gallery` widget                                                                           | `Gallery` hard-crops to 4:3, which destroys portrait and landscape compositions                                                                                                            |
+| D9  | Résumé PDF                   | Ship `artifacts/Peng Zhao Resume - 02062026.pdf` unmodified as `public/resume.pdf`; **omit the phone number from the web CV page** | Owner's explicit choice. The PDF is already a document he distributes; the web page need not repeat the number                                                                             |
 
 ---
 
@@ -121,14 +121,14 @@ LinkedIn `peng-zhao-nlo`, X `@pengzha0`; 知乎 marked TBD by the owner and ther
 
 ### 4.2 Data flow
 
-| Route | Content source | Shape |
-| --- | --- | --- |
-| `/cv` | `src/data/cv.ts` | Single nested object: `summary`, `metrics`, `experience[]`, `education[]`, `patents[]`, `links` |
-| `/publications` | `src/data/publications.ts` | Typed array of `Publication`; abstract is a string; `featured` flag drives the home page |
-| `/projects` and `/projects/<slug>` | `src/content/projects/*.mdx` | Content collection: zod-typed frontmatter for card metadata, MDX body for the case study |
-| `/photography` | Auto-discovered from `src/assets/images/photography/**` + optional overrides in `src/data/photography.ts` | `import.meta.glob` scan; the TS file supplies captions, alt text, and ordering by filename key |
-| `/blog` | `src/data/post/*.md` | Existing `post` collection, fed by the sync script (§6) |
-| `/` and global chrome | `src/config.yaml`, `src/navigation.ts` | Template's existing config system |
+| Route                              | Content source                                                                                            | Shape                                                                                           |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `/cv`                              | `src/data/cv.ts`                                                                                          | Single nested object: `summary`, `metrics`, `experience[]`, `education[]`, `patents[]`, `links` |
+| `/publications`                    | `src/data/publications.ts`                                                                                | Typed array of `Publication`; abstract is a string; `featured` flag drives the home page        |
+| `/projects` and `/projects/<slug>` | `src/content/projects/*.mdx`                                                                              | Content collection: zod-typed frontmatter for card metadata, MDX body for the case study        |
+| `/photography`                     | Auto-discovered from `src/assets/images/photography/**` + optional overrides in `src/data/photography.ts` | `import.meta.glob` scan; the TS file supplies captions, alt text, and ordering by filename key  |
+| `/blog`                            | `src/data/post/*.md`                                                                                      | Existing `post` collection, fed by the sync script (§6)                                         |
+| `/` and global chrome              | `src/config.yaml`, `src/navigation.ts`                                                                    | Template's existing config system                                                               |
 
 ### 4.3 New content collection
 
@@ -139,18 +139,18 @@ const projectCollection = defineCollection({
   loader: glob({ pattern: '*.mdx', base: 'src/content/projects' }),
   schema: z.object({
     title: z.string(),
-    summary: z.string(),            // card + meta description, <= 155 chars
+    summary: z.string(), // card + meta description, <= 155 chars
     year: z.number(),
     role: z.string().optional(),
     status: z.enum(['shipped', 'in-progress', 'research']).optional(),
-    stack: z.array(z.string()).default([]),      // tech-stack tags
+    stack: z.array(z.string()).default([]), // tech-stack tags
     components: z.array(z.string()).default([]), // hardware components / parts list
     repo: z.url().optional(),
     demo: z.url().optional(),
     image: z.string().optional(),
     imageAlt: z.string().optional(),
     featured: z.boolean().default(false),
-    weight: z.number().default(0),  // sort order, descending
+    weight: z.number().default(0), // sort order, descending
   }),
 });
 ```
@@ -162,14 +162,14 @@ The `post` collection's existing schema is unchanged.
 All new components live in `src/components/portfolio/`. Each has one purpose and a typed props interface added
 to `src/types.d.ts`, following the template's existing convention.
 
-| Component | Purpose | Props (abbreviated) |
-| --- | --- | --- |
-| `Badge.astro` | Mono-set chip used for tags, venue types, and spec labels | `label`, `tone` (`default` \| `primary` \| `accent`), `icon?` |
-| `ProjectGrid.astro` | Responsive card grid; stack tags, component chips, repo link, subpage link | `items`, `columns` |
-| `PublicationList.astro` | Publication rows with abstract expander; `variant: 'compact'` for the home page | `items`, `variant` |
-| `FilterBar.astro` | Progressive-enhancement tag filter; targets `[data-tags]` descendants | `tags`, `targetSelector` |
-| `PhotoGrid.astro` | Multi-column masonry preserving native aspect ratios, grouped by category, `dialog` lightbox | `groups` |
-| `CVEntry.astro` | Dense résumé row: role, org, dates, location, bullet list | `entry` |
+| Component               | Purpose                                                                                      | Props (abbreviated)                                           |
+| ----------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `Badge.astro`           | Mono-set chip used for tags, venue types, and spec labels                                    | `label`, `tone` (`default` \| `primary` \| `accent`), `icon?` |
+| `ProjectGrid.astro`     | Responsive card grid; stack tags, component chips, repo link, subpage link                   | `items`, `columns`                                            |
+| `PublicationList.astro` | Publication rows with abstract expander; `variant: 'compact'` for the home page              | `items`, `variant`                                            |
+| `FilterBar.astro`       | Progressive-enhancement tag filter; targets `[data-tags]` descendants                        | `tags`, `targetSelector`                                      |
+| `PhotoGrid.astro`       | Multi-column masonry preserving native aspect ratios, grouped by category, `dialog` lightbox | `groups`                                                      |
+| `CVEntry.astro`         | Dense résumé row: role, org, dates, location, bullet list                                    | `entry`                                                       |
 
 The template's `Gallery.astro` and `Projects.astro` widgets are left in place (unused by these pages) rather
 than deleted, consistent with how the template ships unused widgets.
@@ -181,11 +181,11 @@ résumé — the same NDA discipline applied to the sample blog post (§6.5).
 
 **`src/data/publications.ts` — exactly 3 entries**, all patents, transcribed from the résumé:
 
-| Title | Number | Status |
-| --- | --- | --- |
-| Cylindrical Retroreflector Array for Rotation Tracking | US 2023/0086536 A1 (published 2023-03-23) | Issued |
-| Optical Sensing of Translational and Rotational Shaft Movements | US 63/541,246 | Filed |
-| Single Photon Avalanche Diodes for Rotational and Translational Input Detection | US 18/892,374 | Filed |
+| Title                                                                           | Number                                    | Status |
+| ------------------------------------------------------------------------------- | ----------------------------------------- | ------ |
+| Cylindrical Retroreflector Array for Rotation Tracking                          | US 2023/0086536 A1 (published 2023-03-23) | Issued |
+| Optical Sensing of Translational and Rotational Shaft Movements                 | US 63/541,246                             | Filed  |
+| Single Photon Avalanche Diodes for Rotational and Translational Input Detection | US 18/892,374                             | Filed  |
 
 The collection's `metrics` block carries the header statistics the owner's résumé states: 20+ peer-reviewed
 papers, 750+ citations, h-index 11, 13 journals / 8 refereed proceedings / 28 conference presentations. The
@@ -215,7 +215,7 @@ site:
   site: 'https://pengzhao-ai.github.io'
   base: '/'
   trailingSlash: false
-  googleSiteVerificationId: null   # template's ID removed; owner supplies their own later
+  googleSiteVerificationId: null # template's ID removed; owner supplies their own later
 
 metadata:
   title:
@@ -236,10 +236,10 @@ apps:
   blog:
     isEnabled: true
     postsPerPage: 8
-    post:  { isEnabled: true, permalink: '/%slug%', robots: { index: true } }
-    list:  { isEnabled: true, pathname: 'blog', robots: { index: true } }
+    post: { isEnabled: true, permalink: '/%slug%', robots: { index: true } }
+    list: { isEnabled: true, pathname: 'blog', robots: { index: true } }
     category: { isEnabled: true, pathname: 'category', robots: { index: true } }
-    tag:   { isEnabled: true, pathname: 'tag', robots: { index: false } }
+    tag: { isEnabled: true, pathname: 'tag', robots: { index: false } }
     isRelatedPostsEnabled: true
     relatedPostsCount: 4
 
@@ -252,16 +252,16 @@ replaced. No verification ID is invented.
 
 ### 5.2 Palette — `src/components/CustomStyles.astro`
 
-| Token | Light | Dark |
-| --- | --- | --- |
-| `--aw-color-primary` | `rgb(37 99 235)` (cobalt `#2563EB`) | `rgb(96 165 250)` (`#60A5FA`, lightened for contrast on dark) |
-| `--aw-color-secondary` | `rgb(29 78 216)` (`#1D4ED8`) | `rgb(59 130 246)` (`#3B82F6`) |
-| `--aw-color-accent` | `rgb(124 58 237)` (violet `#7C3AED`) | `rgb(167 139 250)` (`#A78BFA`) |
-| `--aw-color-text-heading` | `rgb(15 23 42)` (slate-900) | `rgb(241 245 249)` (slate-100) |
-| `--aw-color-text-default` | `rgb(51 65 85)` (slate-700) | `rgb(203 213 225)` (slate-300) |
-| `--aw-color-text-muted` | `rgb(71 85 105 / 66%)` | `rgb(148 163 184 / 80%)` |
-| `--aw-color-bg-page` | `rgb(250 250 252)` (crisp off-white `#FAFAFC`) | `rgb(8 11 18)` (`#080B12`, deep slate) |
-| `--aw-color-bg-page-dark` | — | `rgb(8 11 18)` |
+| Token                     | Light                                          | Dark                                                          |
+| ------------------------- | ---------------------------------------------- | ------------------------------------------------------------- |
+| `--aw-color-primary`      | `rgb(37 99 235)` (cobalt `#2563EB`)            | `rgb(96 165 250)` (`#60A5FA`, lightened for contrast on dark) |
+| `--aw-color-secondary`    | `rgb(29 78 216)` (`#1D4ED8`)                   | `rgb(59 130 246)` (`#3B82F6`)                                 |
+| `--aw-color-accent`       | `rgb(124 58 237)` (violet `#7C3AED`)           | `rgb(167 139 250)` (`#A78BFA`)                                |
+| `--aw-color-text-heading` | `rgb(15 23 42)` (slate-900)                    | `rgb(241 245 249)` (slate-100)                                |
+| `--aw-color-text-default` | `rgb(51 65 85)` (slate-700)                    | `rgb(203 213 225)` (slate-300)                                |
+| `--aw-color-text-muted`   | `rgb(71 85 105 / 66%)`                         | `rgb(148 163 184 / 80%)`                                      |
+| `--aw-color-bg-page`      | `rgb(250 250 252)` (crisp off-white `#FAFAFC`) | `rgb(8 11 18)` (`#080B12`, deep slate)                        |
+| `--aw-color-bg-page-dark` | —                                              | `rgb(8 11 18)`                                                |
 
 The `::selection` colours are updated to match (`color-mix` of primary over the page colour) rather than the
 template's `lavender`/`black`.
@@ -270,11 +270,11 @@ template's `lavender`/`black`.
 
 Three families via Astro's native Fonts API, all self-hosted and subset to `latin`:
 
-| Role | Family | CSS variable | Weights |
-| --- | --- | --- | --- |
-| UI / body | Inter | `--font-inter` (existing) | `100 900` variable |
-| Headings | Space Grotesk | `--font-space-grotesk` | `300 700` variable |
-| Mono | JetBrains Mono | `--font-jetbrains-mono` | `100 800` variable |
+| Role      | Family         | CSS variable              | Weights            |
+| --------- | -------------- | ------------------------- | ------------------ |
+| UI / body | Inter          | `--font-inter` (existing) | `100 900` variable |
+| Headings  | Space Grotesk  | `--font-space-grotesk`    | `300 700` variable |
+| Mono      | JetBrains Mono | `--font-jetbrains-mono`   | `100 800` variable |
 
 `src/layouts/Layout.astro` adds a `<Font>` entry per new family alongside the existing Inter injection.
 `CustomStyles.astro` maps them:
@@ -339,26 +339,26 @@ malformed source file.
 
 Applied only to fields the draft does not already declare.
 
-| Field | Resolution order |
-| --- | --- |
-| `title` | Existing frontmatter → first `# H1` in the body (removed from the body on write) → humanized filename |
-| `publishDate` | Existing frontmatter → `fs.stat().birthtime` → current date. Always written as ISO 8601 with offset |
-| `excerpt` | Existing frontmatter → first paragraph following the H1, Markdown and inline formatting stripped, truncated at a word boundary to ≤ 155 characters |
-| `tags` | Existing frontmatter → keyword scan (below) → `['Engineering']` |
-| `category` | Existing frontmatter → first matched tag |
-| `author` | Existing frontmatter → `Peng Zhao` (from `src/config.yaml`) |
-| `draft` | Existing frontmatter → `true` when the filename begins with `_` or matches `/draft/i`, otherwise `false` |
-| `image` | Existing frontmatter → `<slug>.{jpg,png,webp}` or `<slug>/*.{jpg,png,webp}` beside the source, copied to `src/assets/images/posts/` and written as `~/assets/images/posts/<file>` |
+| Field         | Resolution order                                                                                                                                                                  |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`       | Existing frontmatter → first `# H1` in the body (removed from the body on write) → humanized filename                                                                             |
+| `publishDate` | Existing frontmatter → `fs.stat().birthtime` → current date. Always written as ISO 8601 with offset                                                                               |
+| `excerpt`     | Existing frontmatter → first paragraph following the H1, Markdown and inline formatting stripped, truncated at a word boundary to ≤ 155 characters                                |
+| `tags`        | Existing frontmatter → keyword scan (below) → `['Engineering']`                                                                                                                   |
+| `category`    | Existing frontmatter → first matched tag                                                                                                                                          |
+| `author`      | Existing frontmatter → `Peng Zhao` (from `src/config.yaml`)                                                                                                                       |
+| `draft`       | Existing frontmatter → `true` when the filename begins with `_` or matches `/draft/i`, otherwise `false`                                                                          |
+| `image`       | Existing frontmatter → `<slug>.{jpg,png,webp}` or `<slug>/*.{jpg,png,webp}` beside the source, copied to `src/assets/images/posts/` and written as `~/assets/images/posts/<file>` |
 
 Keyword vocabulary (case-insensitive substring match on the body; first match wins for `category`):
 
-| Tag | Keywords |
-| --- | --- |
-| `Optics` | optics, optical, lens, laser, photonic, diffraction, polarization, wavefront, aberration, coherence, spectrometer, imaging, sensor |
-| `Hardware` | hardware, pcb, enclosure, manufacturing, tolerance, yield, mechanical, tooling, validation, production, module, npi |
-| `Edge AI` | on-device, edge, inference, quantization, model, neural, ml, embedded, npu, real-time |
-| `System Design` | architecture, trade-off, tradeoff, framework, pipeline, interface, integration, spec, kpi, calibration, system |
-| `Career` | career, interview, promotion, mentorship, team, hiring, transition, leadership |
+| Tag             | Keywords                                                                                                                           |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `Optics`        | optics, optical, lens, laser, photonic, diffraction, polarization, wavefront, aberration, coherence, spectrometer, imaging, sensor |
+| `Hardware`      | hardware, pcb, enclosure, manufacturing, tolerance, yield, mechanical, tooling, validation, production, module, npi                |
+| `Edge AI`       | on-device, edge, inference, quantization, model, neural, ml, embedded, npu, real-time                                              |
+| `System Design` | architecture, trade-off, tradeoff, framework, pipeline, interface, integration, spec, kpi, calibration, system                     |
+| `Career`        | career, interview, promotion, mentorship, team, hiring, transition, leadership                                                     |
 
 ### 6.3 Slug
 
@@ -400,12 +400,12 @@ commands, the inference rules, the safety properties, and how to resolve a confl
 `scripts/prepare-assets.mjs`, exposed as `npm run prepare:assets`. Committed and rerunnable; idempotent by
 content hash; uses `sharp` (already a devDependency).
 
-| Input | Output | Transform |
-| --- | --- | --- |
-| `artifacts/photography/<category>/*.{JPG,jpg,jpeg,PNG,png}` | `src/assets/images/photography/<category>/<basename>.jpg` | Long edge ≤ 2560 px, JPEG quality 82, mozjpeg, **all EXIF/GPS stripped** |
-| `artifacts/Profile.jpg` | `src/assets/images/profile.jpg` | Long edge ≤ 1600 px, quality 84, EXIF stripped |
-| generated | `src/assets/images/og-default.jpg` | 1200×630 card composed via `sharp` from an SVG: page background, name in Space Grotesk, mono subtitle line |
-| generated | `src/assets/favicons/favicon.svg` | `PZ` monogram, hand-authored SVG |
+| Input                                                       | Output                                                    | Transform                                                                                                  |
+| ----------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `artifacts/photography/<category>/*.{JPG,jpg,jpeg,PNG,png}` | `src/assets/images/photography/<category>/<basename>.jpg` | Long edge ≤ 2560 px, JPEG quality 82, mozjpeg, **all EXIF/GPS stripped**                                   |
+| `artifacts/Profile.jpg`                                     | `src/assets/images/profile.jpg`                           | Long edge ≤ 1600 px, quality 84, EXIF stripped                                                             |
+| generated                                                   | `src/assets/images/og-default.jpg`                        | 1200×630 card composed via `sharp` from an SVG: page background, name in Space Grotesk, mono subtitle line |
+| generated                                                   | `src/assets/favicons/favicon.svg`                         | `PZ` monogram, hand-authored SVG                                                                           |
 
 Category aliases: `protrait` → `portrait`. Unknown categories pass through unchanged. Empty categories are
 skipped.
@@ -601,15 +601,15 @@ The work is complete only when every item below is demonstrated, not assumed.
 
 ## 11. Risks
 
-| Risk | Impact | Mitigation |
-| --- | --- | --- |
-| Astro Fonts API rejects variable-weight ranges for the new families | Build failure | Fall back to discrete weights; documented in §5.3 |
-| `tabler:brand-orcid` absent from the icon set | Missing footer icon | Verify against installed iconify JSON; documented fallbacks in §5.4 |
-| Six nav items overflow at `lg` | Visible layout defect | Verify at exactly 1024 px; shorten `Photography` → `Photos` |
-| É-accented or CJK filenames in future photo drops | Broken slugs | `limax` handles transliteration; `prepare-assets` normalises filenames |
-| Original résumé PDF contains a phone number on a public, indexable site | Privacy exposure | Owner's explicit, informed choice (D9). Web CV omits it. Owner can switch to generated-PDF later |
-| Blog drafts live outside the site's content directory | Easy to forget the sync step | `artifacts/blog/` changes are visible in `git status`; workflow documented in `.agents/skills/` |
-| Publication list is seeded from incomplete source material | Understated publication record | Seeded only with verifiable entries; owner completes the remainder; Scholar button is the authoritative fallback |
+| Risk                                                                    | Impact                         | Mitigation                                                                                                       |
+| ----------------------------------------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Astro Fonts API rejects variable-weight ranges for the new families     | Build failure                  | Fall back to discrete weights; documented in §5.3                                                                |
+| `tabler:brand-orcid` absent from the icon set                           | Missing footer icon            | Verify against installed iconify JSON; documented fallbacks in §5.4                                              |
+| Six nav items overflow at `lg`                                          | Visible layout defect          | Verify at exactly 1024 px; shorten `Photography` → `Photos`                                                      |
+| É-accented or CJK filenames in future photo drops                       | Broken slugs                   | `limax` handles transliteration; `prepare-assets` normalises filenames                                           |
+| Original résumé PDF contains a phone number on a public, indexable site | Privacy exposure               | Owner's explicit, informed choice (D9). Web CV omits it. Owner can switch to generated-PDF later                 |
+| Blog drafts live outside the site's content directory                   | Easy to forget the sync step   | `artifacts/blog/` changes are visible in `git status`; workflow documented in `.agents/skills/`                  |
+| Publication list is seeded from incomplete source material              | Understated publication record | Seeded only with verifiable entries; owner completes the remainder; Scholar button is the authoritative fallback |
 
 ---
 
