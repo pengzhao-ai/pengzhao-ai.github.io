@@ -16,15 +16,14 @@ Images accept `{ src, alt }` where `src` is a local import (`~/assets/images/...
 
 ### Hero and openers
 
-| Widget         | Use it for                                                                         | Key props                                                                                                           | Demo                                         |
-| -------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `Hero`         | Centred hero, image below the text                                                 | `actions`, `image` (`aspect: 'auto'` shows a transparent illustration whole), `badge`, `content` slot               | `/`, `/about`                                |
-| `Hero2`        | Split hero, text left / image right                                                | same as `Hero`                                                                                                      | `/homes/saas`, landings                      |
-| `HeroText`     | Text-only hero for short pages                                                     | `callToAction`, `callToAction2`, `badge`                                                                            | `/contact`, `/pricing`                       |
-| `Announcement` | Bar above the header                                                               | `badge`, `text`, `href`, `showStars`                                                                                | `Layout`                                     |
-| `SocialProof`  | Strip of trust signals (ratings, counts, badges)                                   | `items[{ value, label, icon \| image, rating?, href? }]`, `layout` (`strip` \| `badges`)                            | `/homes/mobile-app`, `/landing/subscription` |
-| `QuickStart`   | TL;DR for developers: the install command with a copy button, three facts, buttons | `commands[]` (string or `{ command, comment }`), `prompt`, `items[{ title, description, icon }]`, `actions`, `note` | `/`                                          |
-| `Countdown`    | Count down to a launch date                                                        | `date` (ISO 8601), `labels`, `expiredText`, `callToAction`                                                          | `/landing/pre-launch`                        |
+| Widget        | Use it for                                                                         | Key props                                                                                                           | Demo                                         |
+| ------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `Hero`        | Centred hero, image below the text                                                 | `actions`, `image` (`aspect: 'auto'` shows a transparent illustration whole), `badge`, `content` slot               | `/`, `/about`                                |
+| `Hero2`       | Split hero, text left / image right                                                | same as `Hero`                                                                                                      | `/homes/saas`, landings                      |
+| `HeroText`    | Text-only hero for short pages                                                     | `callToAction`, `callToAction2`, `badge`                                                                            | `/contact`, `/pricing`                       |
+| `SocialProof` | Strip of trust signals (ratings, counts, badges)                                   | `items[{ value, label, icon \| image, rating?, href? }]`, `layout` (`strip` \| `badges`)                            | `/homes/mobile-app`, `/landing/subscription` |
+| `QuickStart`  | TL;DR for developers: the install command with a copy button, three facts, buttons | `commands[]` (string or `{ command, comment }`), `prompt`, `items[{ title, description, icon }]`, `actions`, `note` | `/`                                          |
+| `Countdown`   | Count down to a launch date                                                        | `date` (ISO 8601), `labels`, `expiredText`, `callToAction`                                                          | `/landing/pre-launch`                        |
 
 ### Features and content
 
