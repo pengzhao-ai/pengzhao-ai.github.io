@@ -1,0 +1,113 @@
+---
+import { Icon } from 'astro-icon/components';
+import Layout from '~/layouts/PageLayout.astro';
+import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
+import Button from '~/components/ui/Button.astro';
+import Badge from '~/components/portfolio/Badge.astro';
+import CVEntry from '~/components/portfolio/CVEntry.astro';
+import { CV_SUMMARY, CV_EXPERIENCE, CV_EDUCATION, CV_PATENTS, CV_LINKS } from '~/data/cv';
+import { HEADLINE_METRICS } from '~/data/metrics';
+
+const metadata = {
+  title: 'CV',
+  description: 'Curriculum vitae — optical systems, sensing hardware, and imaging engineering.',
+};
+---
+
+<Layout metadata={metadata}>
+  <WidgetWrapper containerClass="max-w-4xl mx-auto pt-12 md:pt-16">
+    <header class="mb-12">
+      <h1 class="font-heading text-4xl font-bold tracking-tight text-heading md:text-5xl">Peng Zhao</h1>
+      <p class="mt-2 font-mono text-sm text-primary">Optical Systems · Sensing Hardware · Imaging</p>
+
+      <p class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted">
+        <span class="inline-flex items-center gap-1"
+          ><Icon name="tabler:map-pin" class="h-3.5 w-3.5" />{CV_LINKS.location}</span
+        >
+        <a href={`mailto:${CV_LINKS.email}`} class="inline-flex items-center gap-1 hover:text-primary">
+          <Icon name="tabler:mail" class="h-3.5 w-3.5" />{CV_LINKS.email}
+        </a>
+      </p>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <Button
+          variant="primary"
+          text="Download PDF"
+          href={CV_LINKS.resumePdf}
+          target="_blank"
+          icon="tabler:download"
+        />
+        <Button
+          variant="secondary"
+          text="LinkedIn"
+          href={CV_LINKS.linkedin}
+          target="_blank"
+          icon="tabler:brand-linkedin"
+        />
+        <Button
+          variant="secondary"
+          text="Google Scholar"
+          href={CV_LINKS.scholar}
+          target="_blank"
+          icon="tabler:school"
+        />
+      </div>
+    </header>
+
+    <p class="mb-10 text-default text-pretty">{CV_SUMMARY}</p>
+
+    <dl
+      class="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 md:grid-cols-4 dark:border-slate-800 dark:bg-slate-800"
+    >
+      {
+        HEADLINE_METRICS.map((metric) => (
+          <div class="bg-page px-5 py-4">
+            <dt class="font-mono text-xs uppercase tracking-wider text-muted">{metric.label}</dt>
+            <dd class="mt-1 font-heading text-3xl font-semibold text-heading">{metric.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <section class="mb-12">
+      <h2 class="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted">Experience</h2>
+      {CV_EXPERIENCE.map((entry) => <CVEntry entry={entry} />)}
+    </section>
+
+    <section class="mb-12">
+      <h2 class="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted">Education</h2>
+      {
+        CV_EDUCATION.map((item) => (
+          <div class="grid gap-1 border-b border-slate-200 py-6 last:border-0 md:grid-cols-[10rem_1fr] md:gap-6 dark:border-slate-800">
+            <p class="font-mono text-xs leading-6 whitespace-nowrap text-muted">
+              {item.start} — {item.end}
+            </p>
+            <div>
+              <h3 class="font-heading text-lg font-semibold text-heading">{item.degree}</h3>
+              <p class="text-default">{item.org}</p>
+              {item.detail && <p class="mt-2 text-sm text-muted">{item.detail}</p>}
+            </div>
+          </div>
+        ))
+      }
+    </section>
+
+    <section>
+      <h2 class="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted">Patents</h2>
+      {
+        CV_PATENTS.map((patent) => (
+          <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-200 py-4 last:border-0 dark:border-slate-800">
+            <div>
+              <h3 class="font-semibold text-heading">{patent.title}</h3>
+              <p class="font-mono text-xs text-muted">
+                {patent.number}
+                {patent.date ? ` · ${patent.date}` : ''}
+              </p>
+            </div>
+            <Badge label={patent.status} tone={patent.status === 'Issued' ? 'primary' : 'default'} />
+          </div>
+        ))
+      }
+    </section>
+  </WidgetWrapper>
+</Layout>

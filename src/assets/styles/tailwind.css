@@ -151,3 +151,37 @@
   color: var(--shiki-dark) !important;
   background-color: var(--shiki-dark-bg) !important;
 }
+
+/* /cv prints as a clean document: no chrome, no interactive affordances. */
+@media print {
+  #header,
+  footer,
+  [data-aw-toggle-menu],
+  .btn-primary,
+  .btn-secondary,
+  .btn-tertiary {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  main,
+  .container {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  section,
+  article {
+    break-inside: avoid;
+  }
+
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.75em;
+    color: #555;
+  }
+}
