@@ -142,6 +142,28 @@ check(!home.includes('h-index'), 'home page still shows the metrics strip (h-ind
 check(home.includes('知乎'), 'home page is missing the 知乎 social placeholder');
 check(!home.includes('zhihu.com'), 'home page links to a 知乎 URL the owner has not provided');
 
+// 11. Photography lightbox (owner item 5): the viewer script scopes its
+//     queries to the <aw-photo-grid> root, so the dialog and every trigger
+//     button must live inside that same element. The original template put
+//     the dialog outside the custom element, so the script threw on load and
+//     clicks never opened the viewer.
+const photoPage = await readFile(path.join(DIST, 'photography', 'index.html'), 'utf8');
+const photoStart = photoPage.indexOf('<aw-photo-grid');
+const photoEnd = photoPage.lastIndexOf('</aw-photo-grid>');
+const photoRoots = photoPage.split('<aw-photo-grid').length - 1;
+check(photoRoots === 1, `photography page has ${photoRoots} <aw-photo-grid> roots (expected 1)`);
+check(photoStart !== -1 && photoEnd > photoStart, 'photography page has no closed <aw-photo-grid> root');
+if (photoEnd > photoStart) {
+  const root = photoPage.slice(photoStart, photoEnd);
+  check(root.includes('<dialog'), 'lightbox <dialog> is outside the <aw-photo-grid> root (click-to-magnify breaks)');
+  const triggers = (photoPage.match(/data-photo-open=/g) ?? []).length;
+  const inRoot = (root.match(/data-photo-open=/g) ?? []).length;
+  check(
+    triggers > 0 && triggers === inRoot,
+    `only ${inRoot}/${triggers} photo triggers are inside the lightbox root`
+  );
+}
+
 if (failures.length) {
   console.error(`\n✗ ${failures.length} verification failure(s):\n`);
   for (const failure of failures) console.error(`  - ${failure}`);
