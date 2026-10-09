@@ -172,6 +172,16 @@ export async function main() {
   // The featured section renders only featured entries — currently journals —
   // so its heading must not promise patents it does not render (review finding).
   check(!home.includes('Selected papers and patents'), 'home featured heading promises patents it does not render');
+  // Owner follow-up: a slim experience strip names the four communities as
+  // text wordmarks (CREOL, UCF appears nowhere else), and the publications
+  // panel shows all patents alongside the selected papers.
+  check(home.includes('CREOL, UCF'), 'home page is missing the experience strip (CREOL, UCF)');
+  const homeEntries = (home.match(/data-publication(?![-\w])/g) ?? []).length;
+  check(
+    homeEntries >= 6,
+    `home page renders ${homeEntries} publication entries (expected 3 selected papers + 3 patents)`
+  );
+  check(home.includes('US 2023/0086536 A1'), 'home patents group is missing its entries');
 
   // 11. Photography lightbox (owner item 5): the viewer script scopes its
   //     queries to the <aw-photo-grid> root, so the dialog and every trigger

@@ -18,6 +18,14 @@ const metadata = {
 };
 
 const featuredPublications = PUBLICATIONS.filter((publication) => publication.featured).slice(0, 3);
+const patentPublications = PUBLICATIONS.filter((publication) => publication.type === 'patent').sort(
+  (a, b) => b.year - a.year
+);
+
+// Experience strip: reverse-chronological, names only — the affiliations are
+// the signal, no adjectives. Text wordmarks keep the calm palette and need no
+// logo assets or dark-mode variants.
+const EXPERIENCE_ORGS = ['Meta', 'Apple', 'ASML', 'CREOL, UCF'];
 ---
 
 <Layout metadata={metadata}>
@@ -67,6 +75,18 @@ const featuredPublications = PUBLICATIONS.filter((publication) => publication.fe
     </div>
   </section>
 
+  <section class="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+    <div class="panel">
+      <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted">Experience</p>
+      <p class="mt-3 font-heading text-xl font-semibold tracking-tight text-heading sm:text-2xl">
+        {EXPERIENCE_ORGS.join(' · ')}
+      </p>
+      <p class="mt-3 max-w-3xl text-sm text-muted">
+        Optical and imaging systems across semiconductor lithography, consumer hardware, and AR/VR sensing.
+      </p>
+    </div>
+  </section>
+
   <WidgetWrapper containerClass="max-w-7xl mx-auto">
     <div class="panel">
       <Headline
@@ -95,8 +115,12 @@ const featuredPublications = PUBLICATIONS.filter((publication) => publication.fe
     featuredPublications.length > 0 && (
       <WidgetWrapper containerClass="max-w-4xl mx-auto">
         <div class="panel">
-          <Headline tagline="Publications" title="Selected publications" classes={{ container: 'max-w-3xl' }} />
+          <Headline tagline="Publications" title="Papers and patents" classes={{ container: 'max-w-3xl' }} />
+          <h3 class="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-muted">Selected publications</h3>
           <PublicationList items={featuredPublications} variant="compact" />
+          <div class="my-8 border-t border-slate-200/80 dark:border-slate-700/50" />
+          <h3 class="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-muted">Patents</h3>
+          <PublicationList items={patentPublications} variant="compact" />
           <div class="mt-10 text-center">
             <a href={getPermalink('/publications')} class="btn-secondary">
               All publications
