@@ -170,6 +170,20 @@ if (await exists(toolboxPath)) {
 }
 check(home.includes('/toolbox'), 'home page does not link to /toolbox');
 
+// 13. Publications (owner item 8 + Q3): the full Scholar-derived list ships
+//     and the tag filter bar is gone. `data-publication` counts rendered
+//     entries; the verbatim-title anchor guards against transcription drift.
+const publicationsPage = await readFile(path.join(DIST, 'publications', 'index.html'), 'utf8');
+check(!publicationsPage.includes('data-filter-bar'), 'publication filter bar still rendered');
+const pubCount = (publicationsPage.match(/data-publication(?![-\w])/g) ?? []).length;
+check(pubCount >= 25, `publications page lists ${pubCount} entries (expected at least 25)`);
+check(
+  publicationsPage.includes(
+    'Temporal, spectral, and polarization dependence of the nonlinear optical response of carbon disulfide'
+  ),
+  'publications page is missing the verbatim Google Scholar entry (Optica 2014)'
+);
+
 if (failures.length) {
   console.error(`\n✗ ${failures.length} verification failure(s):\n`);
   for (const failure of failures) console.error(`  - ${failure}`);

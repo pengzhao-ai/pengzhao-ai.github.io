@@ -4,12 +4,14 @@ export interface Metric {
 }
 
 /**
- * Headline figures, as stated on the owner's résumé.
- * Consumed by /publications, /cv, and the home page stats strip.
+ * Headline figures, matching the Google Scholar profile snapshot of
+ * 2026-10-09 (citations, h-index) and the publications list (papers,
+ * patents — see `src/data/publications.ts`). Consumed by /publications
+ * and /cv; the home page deliberately does not carry a metrics strip.
  */
 export const HEADLINE_METRICS: Metric[] = [
-  { value: '20+', label: 'peer-reviewed papers' },
-  { value: '750+', label: 'citations' },
-  { value: '11', label: 'h-index' },
+  { value: '25+', label: 'peer-reviewed papers' },
+  { value: '861', label: 'citations' },
+  { value: '14', label: 'h-index' },
   { value: '3', label: 'patents' },
 ];

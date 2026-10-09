@@ -527,11 +527,6 @@ export interface PublicationList extends Widget {
   variant?: 'full' | 'compact';
 }
 
-export interface FilterBar {
-  tags: string[];
-  targetSelector?: string;
-}
-
 export interface Photo {
   src: ImageMetadata;
   alt: string;

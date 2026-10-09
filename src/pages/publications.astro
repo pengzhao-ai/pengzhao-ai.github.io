@@ -3,9 +3,8 @@ import Layout from '~/layouts/PageLayout.astro';
 import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 import Headline from '~/components/ui/Headline.astro';
 import Button from '~/components/ui/Button.astro';
-import FilterBar from '~/components/portfolio/FilterBar.astro';
 import PublicationList from '~/components/portfolio/PublicationList.astro';
-import { PUBLICATIONS, PUBLICATION_METRICS, usedTags } from '~/data/publications';
+import { PUBLICATIONS, PUBLICATION_METRICS } from '~/data/publications';
 import { HEADLINE_METRICS } from '~/data/metrics';
 
 const metadata = {
@@ -15,44 +14,72 @@ const metadata = {
 
 const stats = HEADLINE_METRICS;
 
-const sorted = [...PUBLICATIONS].sort((a, b) => b.year - a.year);
+const byYear = (a: { year: number }, b: { year: number }) => b.year - a.year;
+
+const journals = PUBLICATIONS.filter((p) => p.type === 'journal').sort(byYear);
+const proceedings = PUBLICATIONS.filter((p) => p.type === 'conference').sort(byYear);
+const patents = PUBLICATIONS.filter((p) => p.type === 'patent').sort(byYear);
+
+const breakdown = [
+  `${journals.length} journal articles`,
+  `${proceedings.length} refereed proceedings`,
+  `${patents.length} patents`,
+].join(', ');
+
+const sections = [
+  { id: 'journals', heading: 'Journal articles', items: journals },
+  { id: 'proceedings', heading: 'Refereed proceedings', items: proceedings },
+  { id: 'patents', heading: 'Patents', items: patents },
+];
 ---
 
 <Layout metadata={metadata}>
   <WidgetWrapper containerClass="max-w-5xl mx-auto pt-12 md:pt-16">
-    <Headline
-      level={1}
-      tagline="Publications"
-      title="Papers and patents"
-      subtitle={PUBLICATION_METRICS.breakdown}
-      classes={{ container: 'max-w-3xl', title: 'text-4xl md:text-5xl ', subtitle: 'text-lg' }}
-    />
+    <div class="panel mb-6">
+      <Headline
+        level={1}
+        tagline="Publications"
+        title="Papers and patents"
+        subtitle={breakdown}
+        classes={{ container: 'max-w-3xl', title: 'text-4xl md:text-5xl ', subtitle: 'text-lg' }}
+      />
 
-    <dl
-      class="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 md:grid-cols-4 dark:border-slate-800 dark:bg-slate-800"
-    >
-      {
-        stats.map((stat) => (
-          <div class="bg-page px-5 py-4">
-            <dt class="font-mono text-xs uppercase tracking-wider text-muted">{stat.label}</dt>
-            <dd class="mt-1 font-heading text-3xl font-semibold text-heading">{stat.value}</dd>
+      <dl
+        class="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 md:grid-cols-4 dark:border-slate-800 dark:bg-slate-800"
+      >
+        {
+          stats.map((stat) => (
+            <div class="bg-page px-5 py-4">
+              <dt class="font-mono text-xs uppercase tracking-wider text-muted">{stat.label}</dt>
+              <dd class="mt-1 font-heading text-3xl font-semibold text-heading">{stat.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    {
+      sections.map((section) => (
+        <section class="panel mb-6" data-publication-section={section.id}>
+          <div class="mb-6 flex items-baseline justify-between gap-4">
+            <h2 class="font-mono text-xs uppercase tracking-[0.2em] text-muted">{section.heading}</h2>
+            <span class="font-mono text-xs text-muted">
+              {section.items.length} {section.items.length === 1 ? 'entry' : 'entries'}
+            </span>
           </div>
-        ))
-      }
-    </dl>
+          <PublicationList items={section.items} variant="full" />
+        </section>
+      ))
+    }
 
-    <FilterBar tags={[...usedTags]} />
-
-    <PublicationList items={sorted} variant="full" />
-
-    <div class="mt-12 rounded-lg border border-slate-200 p-6 text-center dark:border-slate-800">
+    <div class="panel text-center">
       <p class="text-muted">
-        Journal and conference papers are being added. The complete, current list lives on Google Scholar.
+        Titles and author lists are taken verbatim from Google Scholar, where the record stays current.
       </p>
-      <div class="mt-4">
+      <div class="mt-4 flex justify-center">
         <Button
-          variant="primary"
-          text="Full list on Google Scholar"
+          variant="secondary"
+          text="Profile on Google Scholar"
           href={PUBLICATION_METRICS.scholarUrl}
           target="_blank"
           icon="tabler:external-link"
