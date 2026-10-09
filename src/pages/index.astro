@@ -95,7 +95,7 @@ const featuredPublications = PUBLICATIONS.filter((publication) => publication.fe
     featuredPublications.length > 0 && (
       <WidgetWrapper containerClass="max-w-4xl mx-auto">
         <div class="panel">
-          <Headline tagline="Publications" title="Selected papers and patents" classes={{ container: 'max-w-3xl' }} />
+          <Headline tagline="Publications" title="Selected publications" classes={{ container: 'max-w-3xl' }} />
           <PublicationList items={featuredPublications} variant="compact" />
           <div class="mt-10 text-center">
             <a href={getPermalink('/publications')} class="btn-secondary">

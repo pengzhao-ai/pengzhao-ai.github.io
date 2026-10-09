@@ -25,10 +25,10 @@ export const footerData = {
       ],
     },
   ],
-  secondaryLinks: [
-    { text: 'Terms', href: getPermalink('/terms') },
-    { text: 'Privacy Policy', href: getPermalink('/privacy') },
-  ],
+  // Terms/Privacy pages are not shipped: the template's were placeholder demo
+  // text ("Demo content", "[Company name]"). The owner adds real policies and
+  // relinks them here once written.
+  secondaryLinks: [],
   // Entries without a URL yet (e.g. 知乎) are placeholders on the home page,
   // not footer links.
   socialLinks: SOCIALS.flatMap((social) =>

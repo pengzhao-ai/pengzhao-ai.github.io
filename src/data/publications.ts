@@ -26,7 +26,7 @@ export const PUBLICATION_METRICS = {
 const JOURNAL_PUBLICATIONS: Publication[] = [
   {
     title: 'Temporal, spectral, and polarization dependence of the nonlinear optical response of carbon disulfide',
-    authors: ['M Reichert', 'H Hu', 'M Ferdinandus', 'M Seidel', 'P Zhao', 'TR Ensley', '...'],
+    authors: ['M Reichert', 'H Hu', 'MR Ferdinandus', 'M Seidel', 'P Zhao', 'TR Ensley', '...'],
     venue: 'Optica 1 (6), 436-445',
     year: 2014,
     type: 'journal',
