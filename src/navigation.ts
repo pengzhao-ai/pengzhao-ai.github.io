@@ -1,19 +1,46 @@
-import { getPermalink, getAsset } from './utils/permalinks';
+import { getPermalink, getBlogPermalink, getAsset } from './utils/permalinks';
+import { SOCIALS } from './data/socials';
 
 export const headerData = {
   links: [
     { text: 'Home', href: getPermalink('/') },
-    { text: 'Blog', href: getPermalink('/blog') },
+    { text: 'Publications', href: getPermalink('/publications') },
+    { text: 'Projects', href: getPermalink('/projects') },
+    { text: 'Photography', href: getPermalink('/photography') },
+    { text: 'Blog', href: getBlogPermalink() },
+    { text: 'CV', href: getPermalink('/cv') },
   ],
-  actions: [],
+  actions: [
+    {
+      text: 'Résumé',
+      href: getAsset('/resume.pdf'),
+      target: '_blank',
+      icon: 'tabler:download',
+    },
+  ],
 };
 
 export const footerData = {
-  links: [],
+  links: [
+    {
+      title: 'Explore',
+      links: [
+        { text: 'Publications', href: getPermalink('/publications') },
+        { text: 'Projects', href: getPermalink('/projects') },
+        { text: 'Photography', href: getPermalink('/photography') },
+        { text: 'Blog', href: getBlogPermalink() },
+        { text: 'CV', href: getPermalink('/cv') },
+      ],
+    },
+  ],
   secondaryLinks: [
     { text: 'Terms', href: getPermalink('/terms') },
     { text: 'Privacy Policy', href: getPermalink('/privacy') },
   ],
-  socialLinks: [{ ariaLabel: 'RSS', icon: 'tabler:rss', href: getAsset('/rss.xml') }],
-  footNote: `&copy; ${new Date().getFullYear()} Peng Zhao.`,
+  socialLinks: SOCIALS.map((social) => ({
+    ariaLabel: social.label,
+    icon: social.icon,
+    href: social.href,
+  })),
+  footNote: `&copy; ${new Date().getFullYear()} Peng Zhao. Built with AstroWind (MIT).`,
 };

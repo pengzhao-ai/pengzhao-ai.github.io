@@ -1,0 +1,31 @@
+---
+import { Icon } from 'astro-icon/components';
+import { SOCIALS } from '~/data/socials';
+import type { SocialLinks as Props } from '~/types';
+
+const { size = 'default', class: className = '' } = Astro.props;
+const box = size === 'compact' ? 'h-8 w-8' : 'h-10 w-10';
+const glyph = size === 'compact' ? 'h-4 w-4' : 'h-5 w-5';
+---
+
+<ul class:list={['flex list-none flex-wrap gap-2', className]}>
+  {
+    SOCIALS.map((social) => (
+      <li>
+        <a
+          href={social.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={social.label}
+          title={social.label}
+          class:list={[
+            'inline-flex items-center justify-center rounded-lg border border-slate-200 text-muted transition hover:border-primary hover:text-primary dark:border-slate-800',
+            box,
+          ]}
+        >
+          <Icon name={social.icon} class={glyph} />
+        </a>
+      </li>
+    ))
+  }
+</ul>

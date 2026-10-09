@@ -573,3 +573,14 @@ export interface PhotoGroup {
 export interface PhotoGrid extends Widget {
   groups: PhotoGroup[];
 }
+
+export interface SocialLink {
+  label: string;
+  href: string;
+  icon: string;
+}
+
+export interface SocialLinks {
+  size?: 'compact' | 'default';
+  class?: string;
+}

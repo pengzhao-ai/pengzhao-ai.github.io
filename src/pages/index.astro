@@ -1,17 +1,108 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import Hero from '~/components/widgets/Hero.astro';
+import Stats from '~/components/widgets/Stats.astro';
+import BlogLatestPosts from '~/components/widgets/BlogLatestPosts.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
+import Headline from '~/components/ui/Headline.astro';
+import PublicationList from '~/components/portfolio/PublicationList.astro';
+import ProjectGrid from '~/components/portfolio/ProjectGrid.astro';
+import SocialLinks from '~/components/portfolio/SocialLinks.astro';
+import { getCollection } from 'astro:content';
+import { HEADLINE_METRICS } from '~/data/metrics';
+import { PUBLICATIONS } from '~/data/publications';
+import { getPermalink } from '~/utils/permalinks';
+import type { ProjectCard } from '~/types';
 
 const metadata = {
-  title: 'Peng Zhao',
+  title: 'Peng Zhao — Optical Systems, Imaging, and Edge AI',
   ignoreTitleTemplate: true,
 };
+
+const projectEntries = await getCollection('project');
+const featuredProjects: ProjectCard[] = projectEntries
+  .map((entry) => ({ id: entry.id, ...entry.data }))
+  .filter((project) => project.featured)
+  .sort((a, b) => b.weight - a.weight)
+  .slice(0, 3);
+
+const featuredPublications = PUBLICATIONS.filter((publication) => publication.featured).slice(0, 3);
 ---
 
 <Layout metadata={metadata}>
   <Hero
-    tagline="Optical Systems & Edge AI"
+    badge="Optical Systems · Imaging · Edge AI"
+    tagline="Hardware and AI, from concept to production"
     title="Peng Zhao"
-    subtitle="Camera and optical systems engineer. Site under construction."
+  >
+    <Fragment slot="subtitle">
+      Camera and optical systems engineer. I design the optics, sensors, and imaging pipelines behind products that have
+      shipped at scale — and the frameworks that let teams predict how they will perform before anything is built.
+    </Fragment>
+    <Fragment slot="actions">
+      <div class="flex flex-col gap-4 sm:flex-row">
+        <a href={getPermalink('/projects')} class="btn-primary w-full sm:w-auto"> View projects </a>
+        <a href={getPermalink('/cv')} class="btn-secondary w-full sm:w-auto">Download CV</a>
+      </div>
+    </Fragment>
+  </Hero>
+
+  <div class="flex justify-center pb-6">
+    <SocialLinks />
+  </div>
+
+  <Stats countUp stats={HEADLINE_METRICS.map((metric) => ({ amount: metric.value, title: metric.label }))} />
+
+  {
+    featuredProjects.length > 0 && (
+      <WidgetWrapper containerClass="max-w-7xl mx-auto">
+        <Headline
+          tagline="Projects"
+          title="Systems that shipped"
+          subtitle="Optical and hardware architectures taken from concept through mass production."
+          classes={{ container: 'max-w-3xl' }}
+        />
+        <ProjectGrid items={featuredProjects} columns={3} showComponents={false} />
+        <div class="mt-10 text-center">
+          <a href={getPermalink('/projects')} class="btn-secondary">
+            All projects
+          </a>
+        </div>
+      </WidgetWrapper>
+    )
+  }
+
+  {
+    featuredPublications.length > 0 && (
+      <WidgetWrapper containerClass="max-w-4xl mx-auto">
+        <Headline tagline="Publications" title="Selected papers and patents" classes={{ container: 'max-w-3xl' }} />
+        <PublicationList items={featuredPublications} variant="compact" />
+        <div class="mt-10 text-center">
+          <a href={getPermalink('/publications')} class="btn-secondary">
+            All publications
+          </a>
+        </div>
+      </WidgetWrapper>
+    )
+  }
+
+  <BlogLatestPosts
+    title="Writing"
+    linkText="All posts"
+    information="Notes on optical design, hardware that has to ship, and where AI genuinely helps."
+    count={3}
   />
+
+  <CallToAction
+    actions={[
+      { variant: 'primary', text: 'Get in touch', href: `mailto:${'peng.zhao1@outlook.com'}`, icon: 'tabler:mail' },
+      { text: 'Download CV', href: getPermalink('/cv'), icon: 'tabler:download' },
+    ]}
+  >
+    <Fragment slot="title">Let's build something that ships.</Fragment>
+    <Fragment slot="subtitle">
+      I'm interested in optical and sensing systems where the hard part is making the physics survive production.
+    </Fragment>
+  </CallToAction>
 </Layout>

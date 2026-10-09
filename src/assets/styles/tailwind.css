@@ -60,7 +60,10 @@
 }
 
 @utility btn-primary {
-  @apply btn font-semibold bg-primary text-white border-primary hover:bg-secondary hover:border-secondary hover:text-white dark:text-white dark:bg-primary dark:border-primary dark:hover:border-secondary dark:hover:bg-secondary;
+  /* Dark mode's primary is a light blue (#60A5FA), so the label is near-black
+     there; white-on-#60A5FA measures 2.54:1. The light-mode hover label stays
+     white from the base `text-white` above. */
+  @apply btn font-semibold bg-primary text-white border-primary hover:bg-secondary hover:border-secondary dark:text-gray-900 dark:bg-primary dark:border-primary dark:hover:border-secondary dark:hover:bg-secondary dark:hover:text-gray-900;
 }
 
 @utility btn-secondary {
