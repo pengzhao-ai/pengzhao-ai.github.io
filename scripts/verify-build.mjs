@@ -8,7 +8,6 @@
  *
  * Run: npm run verify:build
  */
-import { createHash } from 'node:crypto';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -45,7 +44,6 @@ const ROUTES = [
   '404.html',
   'rss.xml',
   'sitemap-index.xml',
-  'resume.pdf',
 ];
 
 for (const route of ROUTES) {
@@ -84,6 +82,9 @@ for (const file of textFiles) {
   // Owner feedback (item 10): the unlabeled RSS icon in the header reads as a
   // broken "wifi" toggle. Removed from the header; /rss.xml stays published.
   check(!content.includes('aria-label="RSS Feed"'), `header RSS icon still rendered in dist/${rel}`);
+  // Owner feedback (item 9): the résumé PDF is too personal to publish; the
+  // web CV page replaces it. No rendered page may link or point at it.
+  check(!content.includes('resume.pdf'), `résumé PDF referenced in dist/${rel}`);
 }
 
 // 5. No double-prefixed URLs (base is '/', so this should be impossible —
@@ -97,14 +98,9 @@ for (const file of textFiles) {
   check(!DOUBLE_PREFIX.test(content), `double-prefixed URL in dist/${path.relative(DIST, file)}`);
 }
 
-// 6. pagefind/pdf sanity: the résumé PDF is byte-identical to the original.
-const originalPdf = path.join(ROOT, 'artifacts', 'Peng Zhao Resume - 02062026.pdf');
-const shippedPdf = path.join(DIST, 'resume.pdf');
-if (await exists(originalPdf)) {
-  const hash = (buf) => createHash('sha256').update(buf).digest('hex');
-  const [a, b] = await Promise.all([readFile(originalPdf), readFile(shippedPdf)]);
-  check(hash(a) === hash(b), "public/resume.pdf differs from the owner's original PDF");
-}
+// 6. The résumé PDF is no longer shipped (owner item 9). The original stays
+//    in artifacts/ as the source of truth for the web CV's content.
+check(!(await exists(path.join(DIST, 'resume.pdf'))), 'resume.pdf still shipped in dist/');
 
 // 7. The site name reached the metadata.
 const home = await readFile(path.join(DIST, 'index.html'), 'utf8');
@@ -158,10 +154,7 @@ if (photoEnd > photoStart) {
   check(root.includes('<dialog'), 'lightbox <dialog> is outside the <aw-photo-grid> root (click-to-magnify breaks)');
   const triggers = (photoPage.match(/data-photo-open=/g) ?? []).length;
   const inRoot = (root.match(/data-photo-open=/g) ?? []).length;
-  check(
-    triggers > 0 && triggers === inRoot,
-    `only ${inRoot}/${triggers} photo triggers are inside the lightbox root`
-  );
+  check(triggers > 0 && triggers === inRoot, `only ${inRoot}/${triggers} photo triggers are inside the lightbox root`);
 }
 
 if (failures.length) {

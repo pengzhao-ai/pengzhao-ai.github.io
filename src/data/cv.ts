@@ -162,5 +162,4 @@ export const CV_LINKS = {
   scholar: 'https://scholar.google.com/citations?user=w0H4EiQAAAAJ&hl=en&authuser=1',
   orcid: 'https://orcid.org/0000-0001-6370-4206',
   x: 'https://x.com/pengzha0',
-  resumePdf: '/resume.pdf',
 };

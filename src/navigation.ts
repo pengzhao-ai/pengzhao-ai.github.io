@@ -1,4 +1,4 @@
-import { getPermalink, getBlogPermalink, getAsset } from './utils/permalinks';
+import { getPermalink, getBlogPermalink } from './utils/permalinks';
 import { SOCIALS } from './data/socials';
 
 export const headerData = {
@@ -9,14 +9,6 @@ export const headerData = {
     { text: 'Photography', href: getPermalink('/photography') },
     { text: 'Blog', href: getBlogPermalink() },
     { text: 'CV', href: getPermalink('/cv') },
-  ],
-  actions: [
-    {
-      text: 'Résumé',
-      href: getAsset('/resume.pdf'),
-      target: '_blank',
-      icon: 'tabler:download',
-    },
   ],
 };
 

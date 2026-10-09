@@ -108,7 +108,8 @@ runner is used deliberately. Add tests for any new logic in `scripts/`.
 
 - All committed images must have EXIF stripped — the repository is public and camera originals carry GPS.
 - No phone number may appear in any rendered page.
-- `public/resume.pdf` is the owner's original and must remain byte-identical.
+- The résumé PDF is **not** published (owner decision, 2026-10-09): too much personal detail for a
+  public site. `/cv` is the canonical résumé. The original stays in `artifacts/` as a text source.
 
 ## Tailwind CSS v4
 
