@@ -5,7 +5,7 @@ layout: '~/layouts/MarkdownLayout.astro'
 
 _Last updated_: September 06, 2026
 
-> **Demo content.** These terms are placeholder text shipped with the AstroWind template. Replace them with terms written or reviewed for your own site before going live.
+> **Demo content.** These terms are placeholder text. Replace them with terms written or reviewed for your own site before going live.
 
 Please read these terms and conditions carefully before using Our Service.
 

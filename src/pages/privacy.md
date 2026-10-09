@@ -5,7 +5,7 @@ layout: '~/layouts/MarkdownLayout.astro'
 
 _Last updated_: September 06, 2026
 
-> **Demo content.** This policy is placeholder text shipped with the AstroWind template. Replace it with a policy written or reviewed for your own site before going live.
+> **Demo content.** This policy is placeholder text. Replace it with a policy written or reviewed for your own site before going live.
 
 This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.
 

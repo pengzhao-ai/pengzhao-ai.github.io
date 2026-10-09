@@ -1,48 +1,50 @@
 ---
-// Font family is provided by Astro's native Fonts API (see `fonts` in
-// astro.config.ts and <Font /> in Layout.astro), exposed as `--font-inter`.
-// To switch typefaces, change the `fonts` entry and repoint `--aw-font-*` below.
+// Font families are provided by Astro's native Fonts API (see `fonts` in
+// astro.config.ts and the <Font /> tags in Layout.astro), exposed as
+// `--font-inter`, `--font-space-grotesk` and `--font-jetbrains-mono`.
 ---
 
 <style is:inline>
   :root {
     --aw-font-sans: var(--font-inter);
     --aw-font-serif: var(--font-inter);
-    --aw-font-heading: var(--font-inter);
+    --aw-font-heading: var(--font-space-grotesk);
+    --aw-font-mono: var(--font-jetbrains-mono);
 
-    --aw-color-primary: rgb(1 97 239);
-    --aw-color-secondary: rgb(1 84 207);
-    --aw-color-accent: rgb(109 40 217);
+    --aw-color-primary: rgb(37 99 235);
+    --aw-color-secondary: rgb(29 78 216);
+    --aw-color-accent: rgb(124 58 237);
 
-    --aw-color-text-heading: rgb(0 0 0);
-    --aw-color-text-default: rgb(16 16 16);
-    --aw-color-text-muted: rgb(16 16 16 / 66%);
-    --aw-color-bg-page: rgb(255 255 255);
+    --aw-color-text-heading: rgb(15 23 42);
+    --aw-color-text-default: rgb(51 65 85);
+    --aw-color-text-muted: rgb(71 85 105 / 66%);
+    --aw-color-bg-page: rgb(250 250 252);
 
-    --aw-color-bg-page-dark: rgb(8 9 10);
+    --aw-color-bg-page-dark: rgb(8 11 18);
 
     ::selection {
-      background-color: lavender;
+      background-color: color-mix(in srgb, var(--aw-color-primary) 25%, transparent);
     }
   }
 
   .dark {
     --aw-font-sans: var(--font-inter);
     --aw-font-serif: var(--font-inter);
-    --aw-font-heading: var(--font-inter);
+    --aw-font-heading: var(--font-space-grotesk);
+    --aw-font-mono: var(--font-jetbrains-mono);
 
-    --aw-color-primary: rgb(1 97 239);
-    --aw-color-secondary: rgb(1 84 207);
-    --aw-color-accent: rgb(109 40 217);
+    --aw-color-primary: rgb(96 165 250);
+    --aw-color-secondary: rgb(59 130 246);
+    --aw-color-accent: rgb(167 139 250);
 
-    --aw-color-text-heading: rgb(247, 248, 248);
-    --aw-color-text-default: rgb(229 236 246);
-    --aw-color-text-muted: rgb(229 236 246 / 66%);
-    --aw-color-bg-page: rgb(8 9 10);
+    --aw-color-text-heading: rgb(241 245 249);
+    --aw-color-text-default: rgb(203 213 225);
+    --aw-color-text-muted: rgb(148 163 184 / 80%);
+    --aw-color-bg-page: rgb(8 11 18);
 
     ::selection {
-      background-color: black;
-      color: snow;
+      background-color: color-mix(in srgb, var(--aw-color-primary) 35%, transparent);
+      color: rgb(241 245 249);
     }
   }
 </style>

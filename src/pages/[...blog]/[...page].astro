@@ -35,8 +35,7 @@ const breadcrumbs = [
 
 const metadata = {
   title: `Blog${currentPage > 1 ? ` — Page ${currentPage}` : ''}`,
-  description:
-    'Articles about Astro, Tailwind CSS and the AstroWind template: tutorials, customisation guides and web development notes.',
+  description: 'Essays and notes on optics, imaging systems, edge AI, and the practice of engineering.',
   robots: {
     index: blogListRobots?.index && currentPage === 1,
     follow: blogListRobots?.follow,
@@ -54,9 +53,7 @@ const metadata = {
   </Fragment>
   <Breadcrumbs bar items={breadcrumbs} />
   <section class="px-6 sm:px-6 py-12 sm:py-16 lg:py-20 mx-auto max-w-4xl">
-    <Headline
-      subtitle="A statically generated blog example with news, tutorials, resources and other interesting content related to AstroWind"
-    >
+    <Headline subtitle="Essays and notes on optics, imaging systems, edge AI, and the practice of engineering.">
       The Blog
     </Headline>
     <BlogList posts={page.data} />
@@ -69,7 +66,7 @@ const metadata = {
   <Newsletter
     tagline="Newsletter"
     title="New articles in your inbox"
-    subtitle="Tutorials and notes about Astro, Tailwind CSS and the template, when they are published. Nothing else."
+    subtitle="Essays and notes on optics, imaging systems, and edge AI, when they are published. Nothing else."
     button="Subscribe"
     disclaimer="Unsubscribe with one click. This form is a template: pass an <code>action</code> to connect it to your email tool."
     classes={{ container: 'max-w-4xl' }}
