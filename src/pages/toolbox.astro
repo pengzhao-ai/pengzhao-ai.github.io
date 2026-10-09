@@ -1,0 +1,81 @@
+---
+import { Icon } from 'astro-icon/components';
+import Layout from '~/layouts/PageLayout.astro';
+import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
+import Headline from '~/components/ui/Headline.astro';
+import Button from '~/components/ui/Button.astro';
+import ToolboxGrid from '~/components/portfolio/ToolboxGrid.astro';
+import { GITHUB_PROFILE, TOOLBOX, TOOLBOX_CATEGORIES, isGitHubRepoHref } from '~/data/toolbox';
+
+// Fail the build on a violating entry rather than publishing a dead or
+// invented link (owner constraint: real public repos only).
+for (const entry of TOOLBOX) {
+  if (!isGitHubRepoHref(entry.href)) {
+    throw new Error(`Toolbox entry "${entry.title}" is not a github.com/pengzhao-ai repo URL: ${entry.href}`);
+  }
+}
+
+const metadata = {
+  title: 'Toolbox',
+  description: 'Public code projects: optical tooling and AI/imaging pipelines, one GitHub repository at a time.',
+};
+---
+
+<Layout metadata={metadata}>
+  <WidgetWrapper containerClass="max-w-5xl mx-auto pt-12 md:pt-16">
+    <Headline
+      level={1}
+      tagline="Code"
+      title="Toolbox"
+      subtitle="Small, open tools from my own work — optical design utilities and imaging/AI pipelines, published here as each one is ready to be looked at."
+      classes={{ container: 'max-w-3xl', title: 'text-4xl md:text-5xl', subtitle: 'text-lg' }}
+    />
+
+    <div class="space-y-6">
+      {
+        TOOLBOX_CATEGORIES.map((category) => {
+          const items = TOOLBOX.filter((entry) => entry.category === category.id);
+          return (
+            <section class="panel" data-toolbox-category={category.id}>
+              <div class="flex items-baseline justify-between gap-4">
+                <h2 class="font-mono text-xs uppercase tracking-[0.2em] text-muted">{category.label}</h2>
+                <span class="font-mono text-xs text-muted">
+                  {items.length} {items.length === 1 ? 'project' : 'projects'}
+                </span>
+              </div>
+              <p class="mt-2 text-muted text-pretty">{category.blurb}</p>
+              {items.length ? (
+                <div class="mt-6">
+                  <ToolboxGrid items={items} />
+                </div>
+              ) : (
+                <div
+                  class="mt-6 rounded-xl border border-dashed border-slate-300 px-5 py-8 text-center dark:border-slate-700"
+                  data-toolbox-empty
+                >
+                  <Icon name="tabler:tools" class="mx-auto h-6 w-6 text-muted" />
+                  <p class="mt-2 text-sm text-muted">
+                    First entries are being cleaned up for publication — coming soon.
+                  </p>
+                </div>
+              )}
+            </section>
+          );
+        })
+      }
+    </div>
+
+    <div class="panel mt-6 text-center">
+      <p class="text-muted">Everything lands on GitHub as it becomes presentable.</p>
+      <div class="mt-4 flex justify-center">
+        <Button
+          variant="secondary"
+          text="github.com/pengzhao-ai"
+          href={GITHUB_PROFILE}
+          target="_blank"
+          icon="tabler:brand-github"
+        />
+      </div>
+    </div>
+  </WidgetWrapper>
+</Layout>

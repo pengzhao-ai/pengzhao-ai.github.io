@@ -37,7 +37,7 @@ async function* walk(dir) {
 const ROUTES = [
   'index.html',
   'publications/index.html',
-  'projects/index.html',
+  'toolbox/index.html',
   'photography/index.html',
   'cv/index.html',
   'blog/index.html',
@@ -50,15 +50,10 @@ for (const route of ROUTES) {
   check(await exists(path.join(DIST, route)), `missing route: /${route}`);
 }
 
-// 2. Every project has a case-study page.
-const projectDir = path.join(ROOT, 'src', 'content', 'projects');
-if (await exists(projectDir)) {
-  for (const file of await readdir(projectDir)) {
-    if (!file.endsWith('.mdx')) continue;
-    const slug = path.basename(file, '.mdx');
-    check(await exists(path.join(DIST, 'projects', slug, 'index.html')), `missing project page: /projects/${slug}`);
-  }
-}
+// 2. The old /projects case-study routes are gone (owner item 6: the section
+//    is a toolbox of public repos, not job experience). A stale directory
+//    here means the retired pages leaked back into the build.
+check(!(await exists(path.join(DIST, 'projects'))), 'retired /projects directory still in dist');
 
 // 3. No template identifiers survive anywhere in the output.
 const FORBIDDEN = ['astrowind.vercel.app', '@arthelokyo', 'arthelokyo', 'googleSiteVerificationId'];
@@ -111,12 +106,15 @@ check(home.includes('Peng Zhao'), "home page does not contain the owner's name")
 const H1_ROUTES = [
   'index.html',
   'publications/index.html',
-  'projects/index.html',
+  'toolbox/index.html',
   'photography/index.html',
   'cv/index.html',
   'blog/index.html',
 ];
 for (const route of H1_ROUTES) {
+  // A missing route is already reported by check 1; reading it here would
+  // only crash the run.
+  if (!(await exists(path.join(DIST, route)))) continue;
   const page = await readFile(path.join(DIST, route), 'utf8');
   check(/<h1[\s>]/.test(page), `missing <h1>: /${route}`);
 }
@@ -156,6 +154,21 @@ if (photoEnd > photoStart) {
   const inRoot = (root.match(/data-photo-open=/g) ?? []).length;
   check(triggers > 0 && triggers === inRoot, `only ${inRoot}/${triggers} photo triggers are inside the lightbox root`);
 }
+
+// 12. Toolbox (owner item 6): the page is a structure-first index of public
+//     repos. Both categories render, the GitHub profile is linked, and each
+//     empty category says so — the markers are data attributes so the owner
+//     can add entries without breaking the check.
+const toolboxPath = path.join(DIST, 'toolbox', 'index.html');
+if (await exists(toolboxPath)) {
+  const toolbox = await readFile(toolboxPath, 'utf8');
+  check(toolbox.includes('https://github.com/pengzhao-ai'), 'toolbox page does not link the GitHub profile');
+  check(/data-toolbox-category="optics"/.test(toolbox), 'toolbox page is missing the optics category');
+  check(/data-toolbox-category="ai"/.test(toolbox), 'toolbox page is missing the AI category');
+  check(toolbox.includes('data-toolbox-empty'), 'toolbox page does not mark empty categories');
+  check(!toolbox.includes('Case study'), 'toolbox page still carries case-study copy');
+}
+check(home.includes('/toolbox'), 'home page does not link to /toolbox');
 
 if (failures.length) {
   console.error(`\n✗ ${failures.length} verification failure(s):\n`);

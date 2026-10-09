@@ -532,30 +532,6 @@ export interface FilterBar {
   targetSelector?: string;
 }
 
-export interface ProjectCard {
-  id: string;
-  title: string;
-  summary: string;
-  year: number;
-  role?: string;
-  status?: 'shipped' | 'in-progress' | 'research';
-  stack: string[];
-  components: string[];
-  repo?: string;
-  demo?: string;
-  image?: string;
-  imageAlt?: string;
-  featured: boolean;
-  weight: number;
-}
-
-export interface ProjectGrid extends Widget {
-  items: ProjectCard[];
-  columns?: 2 | 3;
-  /** Hide the hardware component list, e.g. in narrow home-page columns. */
-  showComponents?: boolean;
-}
-
 export interface Photo {
   src: ImageMetadata;
   alt: string;

@@ -5,7 +5,7 @@ export const headerData = {
   links: [
     { text: 'Home', href: getPermalink('/') },
     { text: 'Publications', href: getPermalink('/publications') },
-    { text: 'Projects', href: getPermalink('/projects') },
+    { text: 'Toolbox', href: getPermalink('/toolbox') },
     { text: 'Photography', href: getPermalink('/photography') },
     { text: 'Blog', href: getBlogPermalink() },
     { text: 'CV', href: getPermalink('/cv') },
@@ -18,7 +18,7 @@ export const footerData = {
       title: 'Explore',
       links: [
         { text: 'Publications', href: getPermalink('/publications') },
-        { text: 'Projects', href: getPermalink('/projects') },
+        { text: 'Toolbox', href: getPermalink('/toolbox') },
         { text: 'Photography', href: getPermalink('/photography') },
         { text: 'Blog', href: getBlogPermalink() },
         { text: 'CV', href: getPermalink('/cv') },

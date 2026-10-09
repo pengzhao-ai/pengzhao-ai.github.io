@@ -1,0 +1,41 @@
+---
+import { Icon } from 'astro-icon/components';
+import Badge from '~/components/portfolio/Badge.astro';
+import type { ToolboxEntry } from '~/data/toolbox';
+
+export interface Props {
+  items: ToolboxEntry[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="grid list-none gap-5 sm:grid-cols-2">
+  {
+    items.map((item) => (
+      <li class="tile">
+        <a
+          href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group flex h-full flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <span class="flex items-start justify-between gap-3">
+            <span class="font-heading text-lg font-semibold text-heading transition group-hover:text-primary">
+              {item.title}
+            </span>
+            <Icon name="tabler:arrow-up-right" class="mt-1 h-4 w-4 shrink-0 text-muted" />
+          </span>
+          <span class="mt-2 flex-1 text-sm text-muted">{item.summary}</span>
+          {item.stack?.length ? (
+            <span class="mt-4 flex flex-wrap gap-1.5">
+              {item.stack.map((tech) => (
+                <Badge label={tech} />
+              ))}
+            </span>
+          ) : null}
+        </a>
+      </li>
+    ))
+  }
+</ul>

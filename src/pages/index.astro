@@ -6,25 +6,16 @@ import CallToAction from '~/components/widgets/CallToAction.astro';
 import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 import Headline from '~/components/ui/Headline.astro';
 import PublicationList from '~/components/portfolio/PublicationList.astro';
-import ProjectGrid from '~/components/portfolio/ProjectGrid.astro';
 import SocialLinks from '~/components/portfolio/SocialLinks.astro';
-import { getCollection } from 'astro:content';
 import { PUBLICATIONS } from '~/data/publications';
+import { TOOLBOX_CATEGORIES } from '~/data/toolbox';
 import { getPermalink } from '~/utils/permalinks';
 import profile from '~/assets/images/profile.jpg';
-import type { ProjectCard } from '~/types';
 
 const metadata = {
   title: 'Peng Zhao — Optical Systems, Imaging, and Edge AI',
   ignoreTitleTemplate: true,
 };
-
-const projectEntries = await getCollection('project');
-const featuredProjects: ProjectCard[] = projectEntries
-  .map((entry) => ({ id: entry.id, ...entry.data }))
-  .filter((project) => project.featured)
-  .sort((a, b) => b.weight - a.weight)
-  .slice(0, 3);
 
 const featuredPublications = PUBLICATIONS.filter((publication) => publication.featured).slice(0, 3);
 ---
@@ -64,7 +55,7 @@ const featuredPublications = PUBLICATIONS.filter((publication) => publication.fe
             is built.
           </p>
           <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
-            <a href={getPermalink('/projects')} class="btn-primary">View projects</a>
+            <a href={getPermalink('/toolbox')} class="btn-primary">View toolbox</a>
             <a href={getPermalink('/cv')} class="btn-secondary">View CV</a>
           </div>
         </div>
@@ -76,26 +67,29 @@ const featuredPublications = PUBLICATIONS.filter((publication) => publication.fe
     </div>
   </section>
 
-  {
-    featuredProjects.length > 0 && (
-      <WidgetWrapper containerClass="max-w-7xl mx-auto">
-        <div class="panel">
-          <Headline
-            tagline="Projects"
-            title="Systems that shipped"
-            subtitle="Optical and hardware architectures taken from concept through mass production."
-            classes={{ container: 'max-w-3xl' }}
-          />
-          <ProjectGrid items={featuredProjects} columns={3} showComponents={false} />
-          <div class="mt-10 text-center">
-            <a href={getPermalink('/projects')} class="btn-secondary">
-              All projects
-            </a>
-          </div>
-        </div>
-      </WidgetWrapper>
-    )
-  }
+  <WidgetWrapper containerClass="max-w-7xl mx-auto">
+    <div class="panel">
+      <Headline
+        tagline="Toolbox"
+        title="Open code, one repo at a time"
+        subtitle="A growing toolbox of my public code — optical design utilities and imaging/AI pipelines. First entries are on the way."
+        classes={{ container: 'max-w-3xl' }}
+      />
+      <ul class="mx-auto -mt-2 grid max-w-3xl list-none gap-4 sm:grid-cols-2">
+        {
+          TOOLBOX_CATEGORIES.map((category) => (
+            <li class="tile text-center">
+              <span class="font-mono text-xs uppercase tracking-[0.2em] text-muted">{category.label}</span>
+              <p class="mt-2 text-sm text-muted">{category.blurb}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="mt-10 text-center">
+        <a href={getPermalink('/toolbox')} class="btn-secondary"> Open the toolbox </a>
+      </div>
+    </div>
+  </WidgetWrapper>
 
   {
     featuredPublications.length > 0 && (

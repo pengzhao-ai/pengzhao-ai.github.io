@@ -68,38 +68,6 @@ const postCollection = defineCollection({
   }),
 });
 
-const projectCollection = defineCollection({
-  loader: glob({
-    pattern: '*.mdx',
-    base: 'src/content/projects',
-    // Pin the id to the bare filename so `entry.id` is always the URL slug.
-    // The default id derivation differs by Astro version and for some
-    // extensions retains the `.mdx`; three call sites depend on this value
-    // (the card link, the getStaticPaths param, and the verify-build check),
-    // so it is stated here rather than inferred.
-    generateId: ({ entry }) => entry.replace(/\.mdx$/, ''),
-  }),
-  schema: z.object({
-    title: z.string(),
-    summary: z.string(),
-    year: z.number(),
-    role: z.string().optional(),
-    status: z.enum(['shipped', 'in-progress', 'research']).optional(),
-    /** Tech-stack tags, rendered as badges on the card. */
-    stack: z.array(z.string()).default([]),
-    /** Hardware components / parts list, rendered as a mono spec list. */
-    components: z.array(z.string()).default([]),
-    repo: z.url().optional(),
-    demo: z.url().optional(),
-    image: z.string().optional(),
-    imageAlt: z.string().optional(),
-    featured: z.boolean().default(false),
-    /** Sort order, descending. Higher first. */
-    weight: z.number().default(0),
-  }),
-});
-
 export const collections = {
   post: postCollection,
-  project: projectCollection,
 };
