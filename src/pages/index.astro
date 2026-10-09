@@ -1,7 +1,6 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
-import Hero from '~/components/widgets/Hero.astro';
-import Stats from '~/components/widgets/Stats.astro';
+import Image from '~/components/common/Image.astro';
 import BlogLatestPosts from '~/components/widgets/BlogLatestPosts.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
@@ -10,9 +9,9 @@ import PublicationList from '~/components/portfolio/PublicationList.astro';
 import ProjectGrid from '~/components/portfolio/ProjectGrid.astro';
 import SocialLinks from '~/components/portfolio/SocialLinks.astro';
 import { getCollection } from 'astro:content';
-import { HEADLINE_METRICS } from '~/data/metrics';
 import { PUBLICATIONS } from '~/data/publications';
 import { getPermalink } from '~/utils/permalinks';
+import profile from '~/assets/images/profile.jpg';
 import type { ProjectCard } from '~/types';
 
 const metadata = {
@@ -31,43 +30,68 @@ const featuredPublications = PUBLICATIONS.filter((publication) => publication.fe
 ---
 
 <Layout metadata={metadata}>
-  <Hero
-    badge="Optical Systems · Imaging · Edge AI"
-    tagline="Hardware and AI, from concept to production"
-    title="Peng Zhao"
-  >
-    <Fragment slot="subtitle">
-      Camera and optical systems engineer. I design the optics, sensors, and imaging pipelines behind products that have
-      shipped at scale — and the frameworks that let teams predict how they will perform before anything is built.
-    </Fragment>
-    <Fragment slot="actions">
-      <div class="flex flex-col gap-4 sm:flex-row">
-        <a href={getPermalink('/projects')} class="btn-primary w-full sm:w-auto"> View projects </a>
-        <a href={getPermalink('/cv')} class="btn-secondary w-full sm:w-auto">Download CV</a>
+  <section class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 md:pt-10">
+    <div class="panel">
+      <div class="grid items-center gap-8 md:grid-cols-[13rem_1fr] lg:grid-cols-[15rem_1fr] lg:gap-14">
+        <div class="mx-auto w-44 sm:w-52 md:mx-0 md:w-full">
+          <Image
+            class="w-full rounded-2xl"
+            widths={[320, 480, 640]}
+            sizes="(max-width: 767px) 208px, (max-width: 1023px) 240px, 280px"
+            width={profile.width}
+            height={profile.height}
+            layout="constrained"
+            format="webp"
+            src={profile}
+            alt="Peng Zhao"
+          />
+        </div>
+        <div class="text-center md:text-left">
+          <span
+            class="inline-block rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary dark:bg-primary/25 dark:text-blue-200"
+          >
+            Optical Systems · Imaging · Edge AI
+          </span>
+          <h1 class="mt-4 font-heading text-4xl font-bold tracking-tighter text-heading md:text-5xl lg:text-6xl">
+            Peng Zhao
+          </h1>
+          <p class="mt-3 text-lg font-semibold text-secondary dark:text-blue-200">
+            Hardware and AI, from concept to production
+          </p>
+          <p class="mx-auto mt-4 max-w-2xl text-lg text-muted text-pretty dark:text-slate-300 md:mx-0">
+            Camera and optical systems engineer. I design the optics, sensors, and imaging pipelines behind products
+            that have shipped at scale — and the frameworks that let teams predict how they will perform before anything
+            is built.
+          </p>
+          <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
+            <a href={getPermalink('/projects')} class="btn-primary">View projects</a>
+            <a href={getPermalink('/cv')} class="btn-secondary">View CV</a>
+          </div>
+        </div>
       </div>
-    </Fragment>
-  </Hero>
 
-  <div class="flex justify-center pb-6">
-    <SocialLinks />
-  </div>
-
-  <Stats countUp stats={HEADLINE_METRICS.map((metric) => ({ amount: metric.value, title: metric.label }))} />
+      <div class="mt-8 border-t border-slate-200/80 pt-6 dark:border-slate-700/50">
+        <SocialLinks class="justify-center md:justify-start" />
+      </div>
+    </div>
+  </section>
 
   {
     featuredProjects.length > 0 && (
       <WidgetWrapper containerClass="max-w-7xl mx-auto">
-        <Headline
-          tagline="Projects"
-          title="Systems that shipped"
-          subtitle="Optical and hardware architectures taken from concept through mass production."
-          classes={{ container: 'max-w-3xl' }}
-        />
-        <ProjectGrid items={featuredProjects} columns={3} showComponents={false} />
-        <div class="mt-10 text-center">
-          <a href={getPermalink('/projects')} class="btn-secondary">
-            All projects
-          </a>
+        <div class="panel">
+          <Headline
+            tagline="Projects"
+            title="Systems that shipped"
+            subtitle="Optical and hardware architectures taken from concept through mass production."
+            classes={{ container: 'max-w-3xl' }}
+          />
+          <ProjectGrid items={featuredProjects} columns={3} showComponents={false} />
+          <div class="mt-10 text-center">
+            <a href={getPermalink('/projects')} class="btn-secondary">
+              All projects
+            </a>
+          </div>
         </div>
       </WidgetWrapper>
     )
@@ -76,12 +100,14 @@ const featuredPublications = PUBLICATIONS.filter((publication) => publication.fe
   {
     featuredPublications.length > 0 && (
       <WidgetWrapper containerClass="max-w-4xl mx-auto">
-        <Headline tagline="Publications" title="Selected papers and patents" classes={{ container: 'max-w-3xl' }} />
-        <PublicationList items={featuredPublications} variant="compact" />
-        <div class="mt-10 text-center">
-          <a href={getPermalink('/publications')} class="btn-secondary">
-            All publications
-          </a>
+        <div class="panel">
+          <Headline tagline="Publications" title="Selected papers and patents" classes={{ container: 'max-w-3xl' }} />
+          <PublicationList items={featuredPublications} variant="compact" />
+          <div class="mt-10 text-center">
+            <a href={getPermalink('/publications')} class="btn-secondary">
+              All publications
+            </a>
+          </div>
         </div>
       </WidgetWrapper>
     )

@@ -576,11 +576,11 @@ export interface PhotoGrid extends Widget {
 
 export interface SocialLink {
   label: string;
-  href: string;
+  /** Missing while the owner has not supplied a URL (e.g. 知乎) — rendered as a non-clickable placeholder. */
+  href?: string;
   icon: string;
 }
 
 export interface SocialLinks {
-  size?: 'compact' | 'default';
   class?: string;
 }

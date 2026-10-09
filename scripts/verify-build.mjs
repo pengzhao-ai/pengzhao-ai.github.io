@@ -81,6 +81,9 @@ for (const file of textFiles) {
     check(!content.includes(needle), `template identifier "${needle}" found in dist/${rel}`);
   }
   check(!PHONE.test(content), `phone number found in dist/${rel}`);
+  // Owner feedback (item 10): the unlabeled RSS icon in the header reads as a
+  // broken "wifi" toggle. Removed from the header; /rss.xml stays published.
+  check(!content.includes('aria-label="RSS Feed"'), `header RSS icon still rendered in dist/${rel}`);
 }
 
 // 5. No double-prefixed URLs (base is '/', so this should be impossible —
@@ -127,6 +130,17 @@ for (const route of H1_ROUTES) {
 //    (spec §1 lists a newsletter as a non-goal).
 const blogIndex = await readFile(path.join(DIST, 'blog', 'index.html'), 'utf8');
 check(!blogIndex.includes('name="newsletter"'), 'demo newsletter form found in dist/blog/index.html');
+
+// 10. Home identity (owner items 2–4): the hero carries the profile photo,
+//     the metrics strip is gone (figures live on /cv and /publications), and
+//     the 知乎 entry ships as a placeholder — never a guessed URL. 'h-index'
+//     is the marker: it only ever appears in the strip (the site meta
+//     description legitimately says "20+ peer-reviewed papers", and
+//     "citations" lives inside the Scholar URL).
+check(/src="[^"]*profile[^"]*\.(webp|jpg|png)"/.test(home), 'home page has no profile photo');
+check(!home.includes('h-index'), 'home page still shows the metrics strip (h-index)');
+check(home.includes('知乎'), 'home page is missing the 知乎 social placeholder');
+check(!home.includes('zhihu.com'), 'home page links to a 知乎 URL the owner has not provided');
 
 if (failures.length) {
   console.error(`\n✗ ${failures.length} verification failure(s):\n`);

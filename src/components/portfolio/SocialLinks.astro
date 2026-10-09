@@ -3,29 +3,43 @@ import { Icon } from 'astro-icon/components';
 import { SOCIALS } from '~/data/socials';
 import type { SocialLinks as Props } from '~/types';
 
-const { size = 'default', class: className = '' } = Astro.props;
-const box = size === 'compact' ? 'h-8 w-8' : 'h-10 w-10';
-const glyph = size === 'compact' ? 'h-4 w-4' : 'h-5 w-5';
+// Icon + name pills (owner item 4). Entries without an `href` — currently the
+// 知乎 placeholder — render as non-clickable, so no URL is ever invented.
+const { class: className = '' } = Astro.props;
+
+const pill = 'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm transition';
 ---
 
 <ul class:list={['flex list-none flex-wrap gap-2', className]}>
   {
-    SOCIALS.map((social) => (
-      <li>
-        <a
-          href={social.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={social.label}
-          title={social.label}
-          class:list={[
-            'inline-flex items-center justify-center rounded-lg border border-slate-200 text-muted transition hover:border-primary hover:text-primary dark:border-slate-800',
-            box,
-          ]}
-        >
-          <Icon name={social.icon} class={glyph} />
-        </a>
-      </li>
-    ))
+    SOCIALS.map((social) =>
+      social.href ? (
+        <li>
+          <a
+            href={social.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class:list={[
+              pill,
+              'border-slate-200/80 bg-white text-default hover:border-primary/50 hover:text-primary dark:border-slate-700/50 dark:bg-slate-900/60 dark:hover:border-primary/60',
+            ]}
+          >
+            <Icon name={social.icon} class="h-4 w-4" />
+            <span>{social.label}</span>
+          </a>
+        </li>
+      ) : (
+        <li>
+          <span
+            aria-disabled="true"
+            title="Link coming soon"
+            class:list={[pill, 'cursor-default border-dashed border-slate-300 text-muted dark:border-slate-700']}
+          >
+            <Icon name={social.icon} class="h-4 w-4" />
+            <span>{social.label}</span>
+          </span>
+        </li>
+      )
+    )
   }
 </ul>

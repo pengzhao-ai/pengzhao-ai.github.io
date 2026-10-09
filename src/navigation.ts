@@ -37,10 +37,10 @@ export const footerData = {
     { text: 'Terms', href: getPermalink('/terms') },
     { text: 'Privacy Policy', href: getPermalink('/privacy') },
   ],
-  socialLinks: SOCIALS.map((social) => ({
-    ariaLabel: social.label,
-    icon: social.icon,
-    href: social.href,
-  })),
+  // Entries without a URL yet (e.g. 知乎) are placeholders on the home page,
+  // not footer links.
+  socialLinks: SOCIALS.flatMap((social) =>
+    social.href ? [{ ariaLabel: social.label, icon: social.icon, href: social.href }] : []
+  ),
   footNote: `&copy; ${new Date().getFullYear()} Peng Zhao. Built with AstroWind (MIT).`,
 };

@@ -11,4 +11,6 @@ export const SOCIALS: SocialLink[] = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/peng-zhao-nlo/', icon: 'tabler:brand-linkedin' },
   { label: 'ORCID', href: 'https://orcid.org/0000-0001-6370-4206', icon: 'tabler:atom' },
   { label: 'X', href: 'https://x.com/pengzha0', icon: 'tabler:brand-x' },
+  // Placeholder: rendered as a non-clickable entry until the owner supplies a URL.
+  { label: '知乎', icon: 'tabler:brand-zhihu' },
 ];
