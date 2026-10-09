@@ -1,0 +1,69 @@
+---
+import type { ImageMetadata } from 'astro';
+import Layout from '~/layouts/PageLayout.astro';
+import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
+import Headline from '~/components/ui/Headline.astro';
+import PhotoGrid from '~/components/portfolio/PhotoGrid.astro';
+import { CATEGORY_LABELS, CATEGORY_ORDER, PHOTO_OVERRIDES } from '~/data/photography';
+import type { PhotoGroup } from '~/types';
+
+const metadata = {
+  title: 'Photography',
+  description: 'Selected landscape, wildlife, and macro photography.',
+};
+
+// Every image under src/assets/images/photography/ is picked up
+// automatically. Dropping a new file into a category folder and rebuilding
+// is the entire workflow.
+const modules = import.meta.glob<{ default: ImageMetadata }>('~/assets/images/photography/**/*.{jpg,jpeg,png,webp}', {
+  eager: true,
+});
+
+const byCategory = new Map<string, PhotoGroup['photos']>();
+
+for (const [filePath, module] of Object.entries(modules)) {
+  const segments = filePath.split('/');
+  const fileName = segments.pop() as string;
+  const category = segments.pop() as string;
+  const override = PHOTO_OVERRIDES[fileName] ?? {};
+
+  const photo = {
+    src: module.default,
+    alt: override.alt ?? override.title ?? `Photograph by Peng Zhao (${fileName})`,
+    caption: override.title,
+    location: override.location,
+    weight: override.weight ?? 0,
+  };
+
+  if (!byCategory.has(category)) byCategory.set(category, []);
+  byCategory.get(category)!.push(photo);
+}
+
+const humanize = (key: string) => key.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+const labelFor = (key: string) => CATEGORY_LABELS[key] ?? humanize(key);
+
+const groups: PhotoGroup[] = [...byCategory.entries()]
+  .map(([key, photos]) => ({
+    key,
+    label: labelFor(key),
+    photos: photos.sort((a, b) => b.weight - a.weight || a.src.src.localeCompare(b.src.src)),
+  }))
+  .sort((a, b) => {
+    const ai = CATEGORY_ORDER.indexOf(a.key);
+    const bi = CATEGORY_ORDER.indexOf(b.key);
+    return (ai === -1 ? CATEGORY_ORDER.length : ai) - (bi === -1 ? CATEGORY_ORDER.length : bi);
+  });
+---
+
+<Layout metadata={metadata}>
+  <WidgetWrapper containerClass="max-w-6xl mx-auto pt-12 md:pt-16">
+    <Headline
+      tagline="Photography"
+      title="Looking closely"
+      subtitle="Photographs made away from work — landscape, wildlife, and macro."
+      classes={{ container: 'max-w-3xl', title: 'text-4xl md:text-5xl ', subtitle: 'text-lg' }}
+    />
+    <PhotoGrid groups={groups} />
+  </WidgetWrapper>
+</Layout>

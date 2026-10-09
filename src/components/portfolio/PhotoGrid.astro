@@ -1,0 +1,139 @@
+---
+import { Icon } from 'astro-icon/components';
+import Image from '~/components/common/Image.astro';
+import type { PhotoGrid as Props } from '~/types';
+
+// Masonry via CSS multi-column. Natural aspect ratios are preserved by
+// passing each image's true dimensions, so nothing is cropped and the
+// browser reserves the correct space (no layout shift).
+//
+// The lightbox reuses the template Gallery widget's approach: a native
+// <dialog>, keyboard navigable, no library.
+
+const { groups, id } = Astro.props;
+const flat = groups.flatMap((group) => group.photos);
+---
+
+<div {...id ? { id } : {}}>
+  {
+    groups.map((group) => (
+      <section class="mb-16 last:mb-0">
+        <h2 class="mb-1 font-mono text-xs uppercase tracking-[0.2em] text-muted">{group.label}</h2>
+        <p class="mb-6 font-mono text-xs text-muted">
+          {group.photos.length} {group.photos.length === 1 ? 'photograph' : 'photographs'}
+        </p>
+
+        <aw-photo-grid>
+          <ul class="columns-1 list-none gap-4 sm:columns-2 lg:columns-3">
+            {group.photos.map((photo) => {
+              const index = flat.indexOf(photo);
+              return (
+                <li class="mb-4 break-inside-avoid">
+                  <figure>
+                    <button
+                      type="button"
+                      class="group block w-full cursor-zoom-in overflow-hidden rounded-lg bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:bg-slate-800"
+                      data-photo-open={index}
+                      aria-label={`Open image: ${photo.alt}`}
+                    >
+                      <Image
+                        class="w-full transition group-hover:opacity-90"
+                        widths={[400, 800, 1200]}
+                        sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                        width={photo.src.width}
+                        height={photo.src.height}
+                        layout="constrained"
+                        format="webp"
+                        src={photo.src}
+                        alt={photo.alt}
+                      />
+                    </button>
+                    {(photo.caption || photo.location) && (
+                      <figcaption class="mt-2 font-mono text-xs text-muted">
+                        {photo.caption}
+                        {photo.caption && photo.location && ' · '}
+                        {photo.location}
+                      </figcaption>
+                    )}
+                  </figure>
+                </li>
+              );
+            })}
+          </ul>
+        </aw-photo-grid>
+      </section>
+    ))
+  }
+
+  <dialog
+    class="m-auto max-h-[92vh] max-w-[92vw] rounded-lg bg-transparent p-0 backdrop:bg-black/85 backdrop:backdrop-blur-sm open:flex open:flex-col"
+    aria-label="Image viewer"
+  >
+    <form method="dialog" class="absolute right-2 top-2 z-10">
+      <button
+        type="submit"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+        aria-label="Close"
+      >
+        <Icon name="tabler:x" class="h-5 w-5" />
+      </button>
+    </form>
+    <button
+      type="button"
+      data-photo-prev
+      class="absolute left-2 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+      aria-label="Previous image"
+    >
+      <Icon name="tabler:chevron-left" class="h-5 w-5" />
+    </button>
+    <button
+      type="button"
+      data-photo-next
+      class="absolute right-2 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+      aria-label="Next image"
+    >
+      <Icon name="tabler:chevron-right" class="h-5 w-5" />
+    </button>
+    <img data-photo-img src="" alt="" class="max-h-[92vh] max-w-[92vw] rounded-lg object-contain" />
+  </dialog>
+</div>
+
+<script is:inline define:vars={{ sources: flat.map((photo) => ({ src: photo.src.src, alt: photo.alt })) }}>
+  function setupPhotoGrid(root) {
+    if (root.hasAttribute('data-initialised')) return;
+    root.setAttribute('data-initialised', '');
+
+    const dialog = root.querySelector('dialog');
+    const img = root.querySelector('[data-photo-img]');
+    const grid = root.closest('div') || document;
+    let index = 0;
+
+    const show = (next) => {
+      index = (next + sources.length) % sources.length;
+      img.src = sources[index].src;
+      img.alt = sources[index].alt;
+    };
+
+    for (const trigger of grid.querySelectorAll('[data-photo-open]')) {
+      trigger.addEventListener('click', () => {
+        show(Number(trigger.getAttribute('data-photo-open')));
+        dialog.showModal();
+      });
+    }
+
+    root.querySelector('[data-photo-prev]')?.addEventListener('click', () => show(index - 1));
+    root.querySelector('[data-photo-next]')?.addEventListener('click', () => show(index + 1));
+
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') show(index - 1);
+      if (event.key === 'ArrowRight') show(index + 1);
+    });
+  }
+
+  function initPhotoGrids() {
+    document.querySelectorAll('aw-photo-grid').forEach(setupPhotoGrid);
+  }
+
+  initPhotoGrids();
+  document.addEventListener('astro:after-swap', initPhotoGrids);
+</script>

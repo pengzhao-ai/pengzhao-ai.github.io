@@ -555,3 +555,21 @@ export interface ProjectGrid extends Widget {
   /** Hide the hardware component list, e.g. in narrow home-page columns. */
   showComponents?: boolean;
 }
+
+export interface Photo {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  location?: string;
+  weight: number;
+}
+
+export interface PhotoGroup {
+  key: string;
+  label: string;
+  photos: Photo[];
+}
+
+export interface PhotoGrid extends Widget {
+  groups: PhotoGroup[];
+}
