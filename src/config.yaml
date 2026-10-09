@@ -2,7 +2,11 @@ site:
   name: Peng Zhao
   site: 'https://pengzhao-ai.github.io'
   base: '/'
-  trailingSlash: false
+  # GitHub Pages always redirects directory URLs to a trailing slash, so the
+  # generated links and canonical URLs use one too (getPermalink/getCanonical
+  # read this). 'never' made `astro preview` 404 the slashed form
+  # ("publications/" looked like an empty page) instead of serving it.
+  trailingSlash: true
 
 # Default SEO metadata
 metadata:
