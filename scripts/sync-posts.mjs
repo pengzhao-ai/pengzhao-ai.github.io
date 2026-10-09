@@ -203,7 +203,7 @@ export function deriveTags(text) {
 
 export const decideDraft = (filename) => /^_/.test(path.basename(filename)) || /draft/i.test(path.basename(filename));
 
-export const slugifyTitle = (text) => slugify(text, { separator: '-' }) || 'post';
+export const slugifyTitle = (text) => slugify(text, { tone: false, separator: '-' }) || 'post';
 
 export function classify({ targetExists, recordedTargetHash, currentTargetHash, sourceChanged, force }) {
   if (!targetExists) return 'create';
@@ -283,26 +283,31 @@ export async function copyPostImage(sourceImage, destDir = IMAGE_DEST) {
   return dest;
 }
 
-export async function planSync({ force = false } = {}) {
-  await mkdir(TARGET_DIR, { recursive: true });
+export async function planSync({
+  force = false,
+  sourcesDir = SOURCES_DIR,
+  targetDir = TARGET_DIR,
+  stateFile = STATE_FILE,
+} = {}) {
+  await mkdir(targetDir, { recursive: true });
 
   let entries;
   try {
-    entries = (await readdir(SOURCES_DIR, { withFileTypes: true }))
+    entries = (await readdir(sourcesDir, { withFileTypes: true }))
       .filter((e) => e.isFile() && e.name.toLowerCase().endsWith('.md'))
       .map((e) => e.name)
       .sort();
   } catch {
-    console.log(`No drafts found at ${path.relative(ROOT, SOURCES_DIR)}/ — nothing to do.`);
+    console.log(`No drafts found at ${path.relative(ROOT, sourcesDir)}/ — nothing to do.`);
     return [];
   }
 
-  const state = await readJson(STATE_FILE, {});
+  const state = await readJson(stateFile, {});
   const seenSlugs = new Set();
   const actions = [];
 
   for (const name of entries) {
-    const sourcePath = path.join(SOURCES_DIR, name);
+    const sourcePath = path.join(sourcesDir, name);
     const raw = await readFile(sourcePath, 'utf8');
 
     let parsed;
@@ -320,11 +325,11 @@ export async function planSync({ force = false } = {}) {
     })();
 
     const title = fm.title ?? deriveTitle(parsed.body, name).title;
-    const slug = fm.slug ?? slugifyTitle(title);
-    if (seenSlugs.has(slug)) {
-      console.warn(`warn: slug collision on "${slug}" (${name}); skipping`);
-      continue;
-    }
+    const baseSlug = fm.slug ?? slugifyTitle(title);
+    // Spec §6.3: collisions within one run are suffixed -2, -3. Deterministic
+    // because entries are processed in sorted order.
+    let slug = baseSlug;
+    for (let n = 2; seenSlugs.has(slug); n += 1) slug = `${baseSlug}-${n}`;
     seenSlugs.add(slug);
 
     const info = await stat(sourcePath);
@@ -352,7 +357,7 @@ export async function planSync({ force = false } = {}) {
     });
 
     const targetName = `${slug}.md`;
-    const targetPath = path.join(TARGET_DIR, targetName);
+    const targetPath = path.join(targetDir, targetName);
     const targetExists = await stat(targetPath).then(
       () => true,
       () => false
@@ -387,7 +392,7 @@ export async function planSync({ force = false } = {}) {
       slug,
       action: 'orphan',
       source: null,
-      target: path.join(TARGET_DIR, `${slug}.md`),
+      target: path.join(targetDir, `${slug}.md`),
       targetName: `${slug}.md`,
       content: null,
       sourceHash: record.sourceHash,
@@ -399,13 +404,18 @@ export async function planSync({ force = false } = {}) {
 
 const ICON = { create: '+', update: '~', skip: '=', conflict: '!', orphan: '?' };
 
-export async function main() {
-  const args = process.argv.slice(2);
+export async function main({
+  argv = process.argv.slice(2),
+  sourcesDir = SOURCES_DIR,
+  targetDir = TARGET_DIR,
+  stateFile = STATE_FILE,
+} = {}) {
+  const args = argv;
   const write = args.includes('--write');
   const force = args.includes('--force');
   const prune = args.includes('--prune');
 
-  const actions = await planSync({ force });
+  const actions = await planSync({ force, sourcesDir, targetDir, stateFile });
   if (!actions.length) return;
 
   console.log(`\n${write ? 'WRITING' : 'PREVIEW (pass --write to apply)'}\n`);
@@ -424,9 +434,14 @@ export async function main() {
       .join(', ')}\n`
   );
 
+  // Spec §6.1: a conflict fails the run so a hook or CI job notices. It is
+  // not fatal — the preview still prints, and --write still leaves the
+  // conflicted target untouched — but the exit code carries the warning.
+  if (counts.conflict) process.exitCode = 1;
+
   if (!write) return;
 
-  const state = await readJson(STATE_FILE, {});
+  const state = await readJson(stateFile, {});
 
   for (const a of actions) {
     if (a.action === 'skip') continue;
@@ -449,8 +464,8 @@ export async function main() {
     };
   }
 
-  await writeFile(STATE_FILE, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
-  console.log(`State written to ${path.relative(ROOT, STATE_FILE)}\n`);
+  await writeFile(stateFile, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
+  console.log(`State written to ${path.relative(ROOT, stateFile)}\n`);
 }
 
 if (import.meta.filename === process.argv[1]) {

@@ -16,6 +16,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import slugify from 'limax';
 import sharp from 'sharp';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -36,12 +37,41 @@ export const CATEGORY_ALIASES = { protrait: 'portrait' };
 
 export const normalizeCategory = (dir) => CATEGORY_ALIASES[dir] ?? dir;
 
-export const slugifyName = (name) =>
-  path
-    .basename(name, path.extname(name))
+/**
+ * limax transliterates first (É → e, 荷 → he), so accented and CJK filenames
+ * produce stable slugs instead of being silently erased by the ascii cleanup.
+ * The cleanup keeps the names generated before limax existed byte-identical.
+ */
+export const slugifyName = (name) => {
+  const base = path.basename(name, path.extname(name));
+  const slug = slugify(base, { tone: false, separator: '-' })
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+  if (!slug) throw new Error(`cannot derive a filename slug from "${path.basename(name)}"; rename the file`);
+  return slug;
+};
+
+/**
+ * Plan the output path for every source before anything is written, so two
+ * files that transliterate to one slug abort the run instead of the second
+ * silently replacing the first.
+ */
+export function planPhotoOutputs(sources, outDir) {
+  const seen = new Map();
+  return sources.map((src) => {
+    const category = normalizeCategory(path.basename(path.dirname(src)));
+    const dest = path.join(outDir, 'photography', category, `${slugifyName(src)}.jpg`);
+    const previous = seen.get(dest);
+    if (previous) {
+      throw new Error(
+        `two photographs map to the same output "${dest}":\n  ${previous}\n  ${src}\nrename one so the slugs differ.`
+      );
+    }
+    seen.set(dest, src);
+    return { src, dest, category };
+  });
+}
 
 const hash = (buf) => createHash('sha256').update(buf).digest('hex');
 
@@ -133,11 +163,12 @@ export async function main() {
     console.warn('warn: artifacts/Profile.jpg not found; skipping');
   }
 
-  // Photography, grouped by source folder
+  // Photography, grouped by source folder. Plan the whole batch first so a
+  // slug collision aborts before any photo is written.
   const photoRoot = path.join(ARTIFACTS, 'photography');
-  for await (const src of walkImages(photoRoot)) {
-    const category = normalizeCategory(path.basename(path.dirname(src)));
-    const dest = path.join(OUT_IMAGES, 'photography', category, `${slugifyName(src)}.jpg`);
+  const photoSources = [];
+  for await (const src of walkImages(photoRoot)) photoSources.push(src);
+  for (const { src, dest } of planPhotoOutputs(photoSources, OUT_IMAGES)) {
     const r = await optimizeImage(src, dest, { maxEdge: PHOTO_MAX_EDGE, quality: PHOTO_QUALITY });
     rows.push([path.relative(ROOT, dest), r]);
   }

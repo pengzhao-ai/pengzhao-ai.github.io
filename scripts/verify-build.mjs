@@ -107,6 +107,27 @@ if (await exists(originalPdf)) {
 const home = await readFile(path.join(DIST, 'index.html'), 'utf8');
 check(home.includes('Peng Zhao'), "home page does not contain the owner's name");
 
+// 8. Every top-level page carries an <h1>. ui/Headline renders <h2> by
+//    default, so a page whose title uses it must opt in with level={1}.
+const H1_ROUTES = [
+  'index.html',
+  'publications/index.html',
+  'projects/index.html',
+  'photography/index.html',
+  'cv/index.html',
+  'blog/index.html',
+];
+for (const route of H1_ROUTES) {
+  const page = await readFile(path.join(DIST, route), 'utf8');
+  check(/<h1[\s>]/.test(page), `missing <h1>: /${route}`);
+}
+
+// 9. No newsletter form ships. The widget has no backend and its disclaimer
+//    tells the visitor the form is a template — demo copy on a public page
+//    (spec §1 lists a newsletter as a non-goal).
+const blogIndex = await readFile(path.join(DIST, 'blog', 'index.html'), 'utf8');
+check(!blogIndex.includes('name="newsletter"'), 'demo newsletter form found in dist/blog/index.html');
+
 if (failures.length) {
   console.error(`\n✗ ${failures.length} verification failure(s):\n`);
   for (const failure of failures) console.error(`  - ${failure}`);

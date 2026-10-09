@@ -43,3 +43,9 @@ Camera originals carry GPS coordinates and run to tens of megabytes. The
 `.gitignore` blocks them under `artifacts/`, and the optimized copies under
 `src/assets/images/` are what the site serves. Do not add `artifacts/` binaries
 with `git add -f`.
+
+Ignore rules do not untrack a file that was committed before the rule existed.
+`scripts/tests/privacy-invariants.test.mjs` fails if any binary under
+`artifacts/` is tracked — untrack it with `git rm --cached <file>` (the working
+copy stays on disk) and be aware that the earlier commit still holds it in
+history.

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, test } from 'node:test';
@@ -12,9 +12,12 @@ import {
   deriveTags,
   deriveTitle,
   humanize,
+  main,
   maskFences,
   parseSource,
+  planSync,
   renderPost,
+  slugifyTitle,
   stripInline,
 } from '../sync-posts.mjs';
 
@@ -292,5 +295,103 @@ describe('renderPost', () => {
     const [fm] = out.split('\n---\n');
     assert.ok(fm.includes('title: Hi'));
     assert.ok(out.endsWith('Body.\n'));
+  });
+});
+
+describe('slugifyTitle', () => {
+  // Spec §6.3: kebab-case via limax with pinyin tone disabled.
+  test('transliterates CJK titles without tone numbers', () => {
+    assert.equal(slugifyTitle('荷花'), 'he-hua');
+  });
+
+  test('falls back to "post" when nothing sluggable remains', () => {
+    assert.equal(slugifyTitle('🌸'), 'post');
+  });
+});
+
+describe('planSync slug collisions', () => {
+  // Spec §6.3: collisions within one run are suffixed -2, -3. Skipping the
+  // second post would drop it from the site silently.
+  test('suffixes a colliding slug instead of dropping the post', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'sync-slug-'));
+    try {
+      const sourcesDir = path.join(dir, 'blog');
+      await mkdir(sourcesDir);
+      await writeFile(path.join(sourcesDir, 'a-first.md'), '# Same Title\n\nFirst.\n');
+      await writeFile(path.join(sourcesDir, 'b-second.md'), '# Same Title\n\nSecond.\n');
+      await writeFile(path.join(sourcesDir, 'c-third.md'), '# Same Title\n\nThird.\n');
+
+      const actions = await planSync({
+        sourcesDir,
+        targetDir: path.join(dir, 'post'),
+        stateFile: path.join(dir, 'state.json'),
+      });
+
+      assert.deepEqual(
+        actions.map((a) => a.slug),
+        ['same-title', 'same-title-2', 'same-title-3']
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('main exit code', () => {
+  // Spec §6.1: exits 0 on success, 1 on conflict (unless --force), 2 on a
+  // malformed source file. The conflict case is what makes the CLI usable
+  // from a pre-commit hook or CI: a hand-edited post must fail the run, not
+  // merely print a warning.
+  async function conflictedFixture() {
+    const dir = await mkdtemp(path.join(tmpdir(), 'sync-exit-'));
+    const sourcesDir = path.join(dir, 'blog');
+    const targetDir = path.join(dir, 'post');
+    const stateFile = path.join(dir, 'state.json');
+    await mkdir(sourcesDir);
+    await mkdir(targetDir);
+    await writeFile(path.join(sourcesDir, 'hello.md'), '# Hello\n\nBody.\n');
+    // The target was edited by hand after the last sync: its current hash
+    // no longer matches the hash recorded in the state file.
+    await writeFile(path.join(targetDir, 'hello.md'), '---\ntitle: Hello\n---\n\nHand-edited.\n');
+    await writeFile(
+      stateFile,
+      JSON.stringify({
+        hello: {
+          source: 'blog/hello.md',
+          sourceHash: 'stale',
+          target: 'post/hello.md',
+          targetHash: 'stale',
+        },
+      })
+    );
+    return { dir, sourcesDir, targetDir, stateFile };
+  }
+
+  test('sets exit code 1 when the plan contains a conflict', async () => {
+    const { dir, sourcesDir, targetDir, stateFile } = await conflictedFixture();
+    const saved = process.exitCode;
+    try {
+      await main({ argv: [], sourcesDir, targetDir, stateFile });
+      assert.equal(process.exitCode, 1);
+    } finally {
+      process.exitCode = saved === undefined ? undefined : saved;
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('leaves the exit code alone and overwrites when a conflict is forced through', async () => {
+    const { dir, sourcesDir, targetDir, stateFile } = await conflictedFixture();
+    const saved = process.exitCode;
+    try {
+      process.exitCode = undefined;
+      await main({ argv: ['--force', '--write'], sourcesDir, targetDir, stateFile });
+      assert.equal(process.exitCode, undefined);
+      const target = await readFile(path.join(targetDir, 'hello.md'), 'utf8');
+      assert.ok(!target.includes('Hand-edited.'));
+      assert.ok(target.includes('Body.'));
+    } finally {
+      process.exitCode = saved;
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 });

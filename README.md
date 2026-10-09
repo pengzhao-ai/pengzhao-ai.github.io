@@ -43,8 +43,9 @@ Both scripts are dry-run-first and safe to re-run.
   wrote in `scripts/.sync-state.json` and refuses to overwrite a file that was edited by hand since the last
   sync. `artifacts/blog/` is the source of truth; `src/data/post/` is generated.
 - **`scripts/prepare-assets.mjs`** — downscales camera originals from `artifacts/` into
-  `src/assets/images/` and strips all EXIF, including GPS. Originals stay out of git; the optimized copies are
-  committed.
+  `src/assets/images/` and strips all EXIF, including GPS. Originals are not tracked — a guard test enforces
+  it, because `.gitignore` alone cannot untrack a file committed before the rule existed (any such file
+  remains in history) — and the optimized copies are what gets committed.
 - **`scripts/verify-build.mjs`** — asserts the built output has every route, carries no template identifiers,
   and leaks no personal contact details. Run after `npm run build`.
 

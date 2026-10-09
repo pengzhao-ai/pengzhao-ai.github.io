@@ -7,7 +7,7 @@ import { after, before, describe, test } from 'node:test';
 
 import sharp from 'sharp';
 
-import { buildTouchIcon, normalizeCategory, optimizeImage, slugifyName } from '../prepare-assets.mjs';
+import { buildTouchIcon, normalizeCategory, optimizeImage, planPhotoOutputs, slugifyName } from '../prepare-assets.mjs';
 
 const hashFile = async (p) =>
   createHash('sha256')
@@ -37,6 +37,43 @@ describe('slugifyName', () => {
 
   test('strips punctuation and trims separators', () => {
     assert.equal(slugifyName('--A B__C--.JPG'), 'a-b-c');
+  });
+
+  // Spec §10.5: É-accented or CJK filenames must not break slugs. The old
+  // ascii-only regex dropped every non-ascii character, turning 荷花.jpg into
+  // the dotfile ".jpg" — a photo that silently disappears from the build.
+  test('transliterates CJK names instead of dropping them', () => {
+    assert.equal(slugifyName('荷花.jpg'), 'he-hua');
+  });
+
+  test('transliterates accented names', () => {
+    assert.equal(slugifyName('Été au lac.jpg'), 'ete-au-lac');
+  });
+
+  test('throws when no slug can be derived, rather than emitting a dotfile', () => {
+    assert.throws(() => slugifyName('🌸🌸.jpg'), /slug/i);
+  });
+});
+
+describe('planPhotoOutputs', () => {
+  // Two different files can transliterate to the same slug ('Té.jpg' and
+  // 'Te.jpg'). The old loop wrote both to one destination and the second
+  // silently replaced the first, so one photograph never reached the site.
+  test('aborts when two sources map to the same output', () => {
+    assert.throws(() => planPhotoOutputs(['/src/macro/Té.jpg', '/src/macro/Te.jpg'], '/out'), /same output/);
+  });
+
+  test('plans one destination per source, keeping them apart when slugs differ', () => {
+    const plan = planPhotoOutputs(['/src/macro/荷花.jpg', '/src/macro/lotus.jpg'], '/out');
+    assert.deepEqual(
+      plan.map((p) => p.dest),
+      ['/out/photography/macro/he-hua.jpg', '/out/photography/macro/lotus.jpg']
+    );
+  });
+
+  test('normalises the source category folder on the way out', () => {
+    const plan = planPhotoOutputs(['/src/protrait/IMG_1396.JPG'], '/out');
+    assert.equal(plan[0].dest, '/out/photography/portrait/img-1396.jpg');
   });
 });
 
