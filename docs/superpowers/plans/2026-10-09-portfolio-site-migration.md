@@ -1713,12 +1713,10 @@ The site is a static build. Posts live as plain Markdown, and a small sync scrip
 npm run sync:posts -- --write
 npm run build
 ```
-````
 
 That is the whole workflow. No content management system, no database, nothing that can rot.
 
 If any of this is useful to you, or you want to argue with it, the links are in the footer.
-
 ````
 
 Note the deliberately awkward nesting: the file demonstrates the fenced-block case in a real document. Do **not** add frontmatter — the whole point is to exercise inference.
@@ -1727,7 +1725,7 @@ Note the deliberately awkward nesting: the file demonstrates the fenced-block ca
 
 ```bash
 npm run sync:posts
-````
+```
 
 Expected: `PREVIEW (pass --write to apply)`, then `+ create    welcome.md`, then `1 create`. Nothing is written yet. Confirm the file is still absent:
 
@@ -4090,7 +4088,6 @@ Create `.agents/skills/add-publication.md`:
   featured: true,                 // optional — surfaces on the home page
 }
 ```
-````
 
 ## Rules
 
@@ -4100,12 +4097,11 @@ Create `.agents/skills/add-publication.md`:
 - Omit `pdf` and `code` entirely rather than passing an empty string.
 - Setting `featured: true` on at least one entry makes the "Selected papers and
   patents" section appear on the home page. With none featured, the section is hidden.
-
 ````
 
 Create `.agents/skills/add-project.md`:
 
-```markdown
+````markdown
 # Add a Project
 
 ## Steps
@@ -4133,7 +4129,7 @@ imageAlt: 'What the image shows'
 featured: true                    # show on the home page
 weight: 10                        # sort order, higher first
 ---
-````
+```
 
 ## Rules
 
@@ -4143,12 +4139,11 @@ weight: 10                        # sort order, higher first
   project cards. Include the real parts where they are public knowledge.
 - Write only at the level of detail already public in the owner's résumé. No
   employer-internal measurements, yields, or unreleased products.
-
 ````
 
 Create `.agents/skills/add-photograph.md`:
 
-```markdown
+````markdown
 # Add a Photograph
 
 ## Steps
@@ -4183,7 +4178,7 @@ export const PHOTO_OVERRIDES: Record<string, PhotoOverride> = {
     weight: 10,
   },
 };
-````
+```
 
 Without an override, a photograph still renders — it uses the filename for its
 alt text. Overrides only add what a filename cannot express.
@@ -4194,14 +4189,13 @@ Camera originals carry GPS coordinates and run to tens of megabytes. The
 `.gitignore` blocks them under `artifacts/`, and the optimized copies under
 `src/assets/images/` are what the site serves. Do not add `artifacts/` binaries
 with `git add -f`.
-
 ````
 
 - [ ] **Step 4: Verify Prettier is happy with the new Markdown**
 
 ```bash
 npm run check:prettier
-````
+```
 
 Expected: pass. If Prettier reformats the Markdown files, run `npm run fix` and commit the result — the repo is Prettier-clean and must stay so.
 
