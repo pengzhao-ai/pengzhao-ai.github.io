@@ -15,7 +15,7 @@
   venue: 'Optics Express',        // journal or conference name
   year: 2024,
   type: 'journal',                // 'journal' | 'conference' | 'patent'
-  tags: ['Optics'],               // from PUBLICATION_TAGS
+  tags: [],                       // optional — rendered as chips on the entry
   doi: '10.1364/OE.123456',       // optional — renders a DOI link
   pdf: 'https://…',               // optional
   code: 'https://github.com/…',   // optional
@@ -26,8 +26,10 @@
 
 ## Rules
 
-- `tags` must come from `PUBLICATION_TAGS`; a tag outside the list renders but
-  is not filterable.
+- Titles and author lists must be copied verbatim from a public source
+  (Google Scholar, the publisher page). Never paraphrase or invent an entry.
+- `tags` render as chips on the entry; the filter bar was removed, so tags are
+  display-only.
 - `doi` may be a bare DOI or a full `https://doi.org/…` URL — both render correctly.
 - Omit `pdf` and `code` entirely rather than passing an empty string.
 - Setting `featured: true` on at least one entry makes the "Selected papers and

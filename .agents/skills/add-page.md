@@ -11,7 +11,7 @@
 ```astro
 ---
 import Layout from '~/layouts/PageLayout.astro';
-import Hero from '~/components/widgets/Hero.astro';
+import Hero2 from '~/components/widgets/Hero2.astro';
 import Features from '~/components/widgets/Features.astro';
 
 const metadata = {
@@ -21,7 +21,7 @@ const metadata = {
 ---
 
 <Layout metadata={metadata}>
-  <Hero
+  <Hero2
     tagline="Optional tagline"
     title="Page Heading"
     subtitle="Supporting text"
@@ -43,7 +43,7 @@ const metadata = {
 
 ## Available Widget Components
 
-Hero, Features, Content, Steps, Testimonials, FAQs, Stats, Pricing, Brands, CallToAction, Contact, Team
+Hero2, Features, Content, Steps, Testimonials, FAQs, Pricing, Brands, CallToAction, Contact, Team
 
 ## Notes
 

@@ -40,7 +40,7 @@ Light: `lg:bg-white/90` + blur + shadow. Dark: `dark:lg:bg-slate-900` + `border-
 
 ## Sticky background
 
-`#header.scroll > div:first-child` in `tailwind.css`: solid `bg-page` below `lg`, translucent + `backdrop-blur` from `lg`. Before scrolling the header is transparent over the hero on purpose (`Hero.astro` pulls content up with `md:-mt-[76px]`).
+`#header.scroll > div:first-child` in `tailwind.css`: solid `bg-page` below `lg`, translucent + `backdrop-blur` from `lg`. Before scrolling the header is transparent over the hero on purpose (`Hero2.astro` / `HeroText.astro` pull content up with `md:-mt-[76px]`).
 
 ## Notes
 

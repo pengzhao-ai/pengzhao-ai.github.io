@@ -32,7 +32,7 @@ src/
   components/
     common/        # Shared: Image, Metadata, Analytics, ToggleTheme
     ui/            # Primitives: Button, Form, Headline, Timeline, WidgetWrapper
-    widgets/       # Page sections: Hero, Features, Bento, Pricing, Comparison, FAQs, Team, Gallery…
+    widgets/       # Page sections: Hero2, Features, Bento, Pricing, Comparison, FAQs, Team, Gallery…
     blog/          # Blog: SinglePost, List, Pagination, Tags
     CustomStyles.astro  # CSS variables for colors and fonts
   content.config.ts    # Content Collections schema (Astro 5+ location)
@@ -86,9 +86,8 @@ conflict against a hand edit. Edit the draft in `artifacts/blog/` instead.
 | Component               | Use                                                              |
 | ----------------------- | ---------------------------------------------------------------- |
 | `Badge.astro`           | Mono chips for tags, statuses, and venue types                   |
-| `ProjectGrid.astro`     | Project cards — stack tags, hardware components, case-study link |
+| `ToolboxGrid.astro`     | Repo tiles for `/toolbox` — external links, stack chips          |
 | `PublicationList.astro` | Publication rows; `variant="compact"` for the home page          |
-| `FilterBar.astro`       | Progressive-enhancement tag filter over `[data-filterable]`      |
 | `PhotoGrid.astro`       | Masonry gallery preserving native aspect ratios, with a lightbox |
 | `CVEntry.astro`         | A dense résumé row                                               |
 | `SocialLinks.astro`     | Social icon row, driven by `src/data/socials.ts`                 |
@@ -98,6 +97,8 @@ conflict against a hand edit. Edit the draft in `artifacts/blog/` instead.
 - Fonts: Inter (UI), Space Grotesk (`font-heading`), JetBrains Mono (`font-mono`, for all technical labels).
 - Colours: the `--aw-*` variables in `src/components/CustomStyles.astro`, light and dark. Prefer the semantic
   utilities (`text-heading`, `text-muted`, `bg-page`, `text-primary`) over hard-coded Tailwind colours.
+- Surfaces: content sections sit on the `panel` utility (rounded card over the tinted page background); entry
+  cards inside a panel use `tile`. Both mirror in dark mode — put new sections on them.
 
 ### Scripts
 

@@ -22,14 +22,14 @@ npm run build && npm run verify:build   # build, then assert the output invarian
 
 Each content type has one place to put things. Nothing requires editing a page.
 
-| To add a…   | Do this                                                          | Then                                                                        |
-| ----------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Blog post   | Drop a `.md` file in `artifacts/blog/`                           | `npm run sync:posts` to preview, `npm run sync:posts -- --write` to publish |
-| Project     | Add an `.mdx` file in `src/content/projects/`                    | nothing — it appears on `/projects`                                         |
-| Publication | Append an object to `PUBLICATIONS` in `src/data/publications.ts` | nothing — it appears on `/publications`                                     |
-| Photograph  | Drop a `.jpg` in `src/assets/images/photography/<category>/`     | `npm run prepare:assets` if it is a camera original, then rebuild           |
-| CV entry    | Edit `src/data/cv.ts`                                            | nothing — `/cv` re-renders                                                  |
-| Social link | Edit `src/data/socials.ts`                                       | nothing — header, footer, and home all read it                              |
+| To add a…    | Do this                                                          | Then                                                                           |
+| ------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Blog post    | Drop a `.md` file in `artifacts/blog/`                           | `npm run sync:posts` to preview, `npm run sync:posts -- --write` to publish    |
+| Toolbox repo | Append an object to `TOOLBOX` in `src/data/toolbox.ts`           | nothing — it appears on `/toolbox` (must be a public repo under `pengzhao-ai`) |
+| Publication  | Append an object to `PUBLICATIONS` in `src/data/publications.ts` | nothing — it appears on `/publications`                                        |
+| Photograph   | Drop a `.jpg` in `src/assets/images/photography/<category>/`     | `npm run prepare:assets` if it is a camera original, then rebuild              |
+| CV entry     | Edit `src/data/cv.ts`                                            | nothing — `/cv` re-renders                                                     |
+| Social link  | Edit `src/data/socials.ts`                                       | nothing — header, footer, and home all read it                                 |
 
 `.agents/skills/` documents each workflow in more detail, in a format AI coding
 assistants can follow.
