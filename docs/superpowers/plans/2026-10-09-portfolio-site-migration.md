@@ -200,7 +200,7 @@ Downscale and de-EXIF the owner's photographs and profile picture into committab
 
 **Files:**
 - Create: `scripts/prepare-assets.mjs`, `scripts/tests/prepare-assets.test.mjs`, `src/assets/favicons/favicon.svg`
-- Delete: `src/assets/favicons/favicon.ico`, `src/assets/favicons/apple-touch-icon.png` (the template's own branding)
+- Overwritten: `src/assets/favicons/apple-touch-icon.png` (the template's binary, replaced by the generated one)
 - Generated (committed): `src/assets/images/profile.jpg`, `src/assets/images/photography/<category>/<name>.jpg`, `src/assets/images/og-default.jpg`, `src/assets/favicons/apple-touch-icon.png`
 
 **Interfaces:**
@@ -535,13 +535,7 @@ Create `src/assets/favicons/favicon.svg`:
 </svg>
 ```
 
-Then delete the template's remaining favicon binaries, which are AstroWind's own branding and would otherwise ship as the site's tab icon and iOS home-screen icon:
-
-```bash
-rm src/assets/favicons/favicon.ico src/assets/favicons/apple-touch-icon.png
-```
-
-The `.ico` is legacy — every browser that matters reads `favicon.svg`. The touch icon is regenerated as a branded PNG in the next step. Task 3 updates `src/components/Favicons.astro`, which imports all three files, to match.
+Do **not** delete the template's `favicon.ico` or `apple-touch-icon.png` here. `src/components/Favicons.astro` imports both, and only Task 3 touches that file — deleting them in this task would leave the repo unbuildable from this commit until Task 3 lands. Task 3 performs the deletion together with the `Favicons.astro` rewrite, in one atomic commit. This task overwrites `apple-touch-icon.png` with the generated monogram in Step 6, which needs no import change.
 
 - [ ] **Step 6: Generate the assets**
 
@@ -872,6 +866,14 @@ Two constraints this signature honours, both load-bearing:
 
 - [ ] **Step 9: Point the favicon links at the new assets**
 
+First delete the template's own favicon binary, which is AstroWind's branding and would otherwise ship as the site's tab icon. The `.ico` is legacy — every browser that matters reads `favicon.svg`.
+
+```bash
+rm src/assets/favicons/favicon.ico
+```
+
+This deletion and the rewrite below must land in the same commit: `Favicons.astro` imports the file, so deleting it alone breaks the build. (`apple-touch-icon.png` was already overwritten with the generated monogram in Task 2 and stays.)
+
 Replace the entire contents of `src/components/Favicons.astro` with:
 
 ```astro
@@ -885,7 +887,7 @@ import appleTouchIcon from '~/assets/favicons/apple-touch-icon.png';
 <link rel="apple-touch-icon" sizes="180x180" href={appleTouchIcon.src} />
 ```
 
-Two changes beyond dropping the deleted `.ico`: the `mask-icon` colour moves off the template's violet `#8D46E7` onto the cobalt `#2563EB` from the palette, and the `apple-touch-icon` now points at the generated monogram. Without this step the build fails on the missing `favicon.ico` import — which is the point: the failure surfaces the branding change rather than shipping the template's icon.
+Two changes beyond dropping the `.ico`: the `mask-icon` colour moves off the template's violet `#8D46E7` onto the cobalt `#2563EB` from the palette, and the `apple-touch-icon` now points at the generated monogram. Do the `rm` and this rewrite together — the import is what makes the deletion a build break on its own.
 
 - [ ] **Step 10: Verify the build and type checks are green**
 
@@ -3445,7 +3447,7 @@ Assemble the home page from the components the previous tasks built, and install
 - Modify: `src/pages/index.astro`, `src/navigation.ts`, `src/types.d.ts`
 
 **Interfaces:**
-- Consumes: `ProjectGrid` (Task 6), `PublicationList` with `variant="compact"` (Task 5), `cv.ts` (Task 8), the `post` collection from Task 4.
+- Consumes: `ProjectGrid` (Task 6), `PublicationList` with `variant="compact"` (Task 5), `HEADLINE_METRICS` from `src/data/metrics.ts` (Task 5), `SOCIALS` defined in this task, the `post` collection from Task 4.
 - Produces: `<SocialLinks size? />`, used by the home page, footer, and (optionally) the CV page.
 
 - [ ] **Step 1: Add the types**
