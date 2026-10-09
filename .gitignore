@@ -26,3 +26,14 @@ pnpm-lock.yaml
 pnpm-workspace.yaml
 
 .astro
+
+# Large binary source artifacts. Optimized web copies are committed under
+# src/assets/images/ instead; see scripts/prepare-assets.mjs.
+artifacts/**/*.JPG
+artifacts/**/*.jpg
+artifacts/**/*.jpeg
+artifacts/**/*.png
+artifacts/**/*.pdf
+artifacts/**/*.docx
+artifacts/**/*.rtf
+artifacts/**/*.pptx
