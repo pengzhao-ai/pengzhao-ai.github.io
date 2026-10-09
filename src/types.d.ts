@@ -497,3 +497,37 @@ export interface Integrations extends Omit<Headline, 'classes'>, Widget {
   items?: Array<Integration>;
   columns?: number;
 }
+
+// PORTFOLIO
+
+export interface Publication {
+  title: string;
+  authors: string[];
+  venue?: string;
+  year: number;
+  type: 'journal' | 'conference' | 'patent';
+  tags: string[];
+  doi?: string;
+  pdf?: string;
+  code?: string;
+  abstract?: string;
+  patentNumber?: string;
+  status?: string;
+  featured?: boolean;
+}
+
+export interface Badge {
+  label: string;
+  tone?: 'default' | 'primary' | 'accent';
+  icon?: string;
+}
+
+export interface PublicationList extends Widget {
+  items?: Publication[];
+  variant?: 'full' | 'compact';
+}
+
+export interface FilterBar {
+  tags: string[];
+  targetSelector?: string;
+}

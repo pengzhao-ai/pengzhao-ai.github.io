@@ -1,0 +1,22 @@
+---
+import { Icon } from 'astro-icon/components';
+import { twMerge } from 'tailwind-merge';
+import type { Badge as Props } from '~/types';
+
+const { label, tone = 'default', icon } = Astro.props;
+const toneClass = {
+  default: 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300',
+  primary: 'border-primary/25 bg-primary/8 text-primary dark:bg-primary/15',
+  accent: 'border-accent/25 bg-accent/8 text-accent dark:bg-accent/15',
+}[tone];
+---
+
+<span
+  class={twMerge(
+    'inline-flex items-center gap-1 rounded border px-2 py-0.5 font-mono text-[11px] leading-5 tracking-tight whitespace-nowrap',
+    toneClass
+  )}
+>
+  {icon && <Icon name={icon} class="h-3 w-3" />}
+  {label}
+</span>

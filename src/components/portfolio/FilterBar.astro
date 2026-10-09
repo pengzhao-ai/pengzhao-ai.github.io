@@ -1,0 +1,81 @@
+---
+// Progressive-enhancement tag filter. The buttons are inert without
+// JavaScript, and the list underneath renders in full — filtering is an
+// enhancement, never a gate. See Review Focus #5.
+import type { FilterBar as Props } from '~/types';
+
+const { tags, targetSelector = '[data-filterable]' } = Astro.props;
+---
+
+<div
+  class="mb-8 flex flex-wrap gap-2"
+  data-filter-bar
+  data-target={targetSelector}
+  role="group"
+  aria-label="Filter by topic"
+>
+  <button
+    type="button"
+    class="cursor-pointer rounded border border-primary bg-primary px-2.5 py-1 font-mono text-xs text-white transition"
+    data-filter="all"
+    aria-pressed="true">All</button
+  >
+  {
+    tags.map((tag) => (
+      <button
+        type="button"
+        class="cursor-pointer rounded border border-slate-200 bg-transparent px-2.5 py-1 font-mono text-xs text-slate-600 transition hover:border-primary hover:text-primary dark:border-slate-700 dark:text-slate-300"
+        data-filter={tag}
+        aria-pressed="false"
+      >
+        {tag}
+      </button>
+    ))
+  }
+  <span class="ml-auto self-center font-mono text-xs text-muted" data-filter-count aria-live="polite"></span>
+</div>
+
+<script>
+  const ACTIVE_BUTTON = 'border-primary bg-primary text-white';
+  const INACTIVE_BUTTON =
+    'border-slate-200 bg-transparent text-slate-600 hover:border-primary hover:text-primary dark:border-slate-700 dark:text-slate-300';
+
+  function initFilterBar(bar: Element) {
+    if (bar.hasAttribute('data-initialised')) return;
+    bar.setAttribute('data-initialised', '');
+
+    const selector = bar.getAttribute('data-target') || '[data-filterable]';
+    const items = Array.from(document.querySelectorAll(selector));
+    const count = bar.querySelector('[data-filter-count]');
+    const buttons = Array.from(bar.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+
+    const apply = (tag: string) => {
+      let visible = 0;
+      for (const item of items) {
+        const itemTags = (item.getAttribute('data-tags') || '').split('|');
+        const show = tag === 'all' || itemTags.includes(tag);
+        (item as HTMLElement).hidden = !show;
+        if (show) visible++;
+      }
+      for (const button of buttons) {
+        const active = button.getAttribute('data-filter') === tag;
+        button.setAttribute('aria-pressed', String(active));
+        button.classList.remove(...(active ? INACTIVE_BUTTON : ACTIVE_BUTTON).split(' '));
+        button.classList.add(...(active ? ACTIVE_BUTTON : INACTIVE_BUTTON).split(' '));
+      }
+      if (count) count.textContent = `${visible} of ${items.length}`;
+    };
+
+    for (const button of buttons) {
+      button.addEventListener('click', () => apply(button.getAttribute('data-filter') || 'all'));
+    }
+    apply('all');
+  }
+
+  function initAll() {
+    document.querySelectorAll('[data-filter-bar]').forEach(initFilterBar);
+  }
+
+  initAll();
+  document.addEventListener('astro:after-swap', initAll);
+</script>

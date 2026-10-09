@@ -1,0 +1,62 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
+import Headline from '~/components/ui/Headline.astro';
+import Button from '~/components/ui/Button.astro';
+import FilterBar from '~/components/portfolio/FilterBar.astro';
+import PublicationList from '~/components/portfolio/PublicationList.astro';
+import { PUBLICATIONS, PUBLICATION_METRICS, usedTags } from '~/data/publications';
+import { HEADLINE_METRICS } from '~/data/metrics';
+
+const metadata = {
+  title: 'Publications',
+  description: 'Peer-reviewed papers, refereed proceedings, and patents in optics, imaging, and hardware systems.',
+};
+
+const stats = HEADLINE_METRICS;
+
+const sorted = [...PUBLICATIONS].sort((a, b) => b.year - a.year);
+---
+
+<Layout metadata={metadata}>
+  <WidgetWrapper containerClass="max-w-5xl mx-auto pt-12 md:pt-16">
+    <Headline
+      tagline="Publications"
+      title="Papers and patents"
+      subtitle={PUBLICATION_METRICS.breakdown}
+      classes={{ container: 'max-w-3xl', title: 'text-4xl md:text-5xl ', subtitle: 'text-lg' }}
+    />
+
+    <dl
+      class="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 md:grid-cols-4 dark:border-slate-800 dark:bg-slate-800"
+    >
+      {
+        stats.map((stat) => (
+          <div class="bg-page px-5 py-4">
+            <dt class="font-mono text-xs uppercase tracking-wider text-muted">{stat.label}</dt>
+            <dd class="mt-1 font-heading text-3xl font-semibold text-heading">{stat.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <FilterBar tags={[...usedTags]} />
+
+    <PublicationList items={sorted} variant="full" />
+
+    <div class="mt-12 rounded-lg border border-slate-200 p-6 text-center dark:border-slate-800">
+      <p class="text-muted">
+        Journal and conference papers are being added. The complete, current list lives on Google Scholar.
+      </p>
+      <div class="mt-4">
+        <Button
+          variant="primary"
+          text="Full list on Google Scholar"
+          href={PUBLICATION_METRICS.scholarUrl}
+          target="_blank"
+          icon="tabler:external-link"
+        />
+      </div>
+    </div>
+  </WidgetWrapper>
+</Layout>
