@@ -217,16 +217,37 @@ export async function main() {
   }
   check(home.includes('/toolbox'), 'home page does not link to /toolbox');
 
-  // 13. Publications (owner item 8 + Q3, revised): the page carries the
-  //     owner's résumé wording verbatim. The Google-Scholar-scraped article
-  //     list read as inaccurate (owner feedback) and was removed; the résumé
-  //     itemizes only the patents and a publications summary. The string
-  //     anchors guard against transcription drift, and the Scholar-author
-  //     needle pins the removal.
+  // 13. Publications (owner item 8 + Q3, revised twice): the summary,
+  //     citation line, and patent details are the owner's résumé wording
+  //     verbatim; the papers list is transcribed from the owner's ORCID
+  //     record (chosen after the Google-Scholar-scraped list read as
+  //     inaccurate — namesake entries). Anchors guard against transcription
+  //     drift; the Scholar-author and erratum checks pin the exclusions.
   const publicationsPage = await readFile(path.join(DIST, 'publications', 'index.html'), 'utf8');
   check(!publicationsPage.includes('data-filter-bar'), 'publication filter bar still rendered');
   const pubCount = (publicationsPage.match(/data-publication(?![-\w])/g) ?? []).length;
-  check(pubCount === 3, `publications page lists ${pubCount} entries (expected the résumé's 3 patents)`);
+  check(
+    pubCount === 31,
+    `publications page lists ${pubCount} entries (expected 10 journal + 18 conference + 3 patents)`
+  );
+  check(
+    publicationsPage.includes('data-publication-section="journal-articles"'),
+    'publications page is missing the journal-articles section'
+  );
+  check(
+    publicationsPage.includes('data-publication-section="conference-papers"'),
+    'publications page is missing the conference-papers section'
+  );
+  check(
+    publicationsPage.includes('Nondegenerate three-photon absorption in zinc-blende semiconductors'),
+    'papers panel is missing the 2025 Optics Express paper (ORCID anchor)'
+  );
+  check(publicationsPage.includes('https://doi.org/10.1364/OE.543020'), 'papers panel is missing DOI links');
+  check(publicationsPage.includes('orcid.org/0000-0001-6370-4206'), 'publications page does not link the ORCID record');
+  check(
+    !publicationsPage.includes('Erratum'),
+    'the Optics Express erratum ships as a paper (a correction notice, not a paper)'
+  );
   check(
     publicationsPage.includes('13 Journals, 8 Refereed Proceedings, and 28 Conference Presentations'),
     'publications page is missing the résumé publications summary'

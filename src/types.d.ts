@@ -502,7 +502,7 @@ export interface Integrations extends Omit<Headline, 'classes'>, Widget {
 
 export interface Publication {
   title: string;
-  authors: string[];
+  authors?: string[];
   venue?: string;
   year: number;
   type: 'journal' | 'conference' | 'patent';

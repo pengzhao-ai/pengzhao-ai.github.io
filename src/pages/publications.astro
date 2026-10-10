@@ -14,10 +14,13 @@ const metadata = {
 
 const stats = HEADLINE_METRICS;
 
+const journals = PUBLICATIONS.filter((p) => p.type === 'journal').sort((a, b) => b.year - a.year);
+const conferences = PUBLICATIONS.filter((p) => p.type === 'conference').sort((a, b) => b.year - a.year);
 const patents = PUBLICATIONS.filter((p) => p.type === 'patent').sort((a, b) => b.year - a.year);
+
 // Assembled here so Prettier line-wrapping can never drop the space between
 // the count and the noun in the rendered HTML.
-const patentCountLabel = `${patents.length} ${patents.length === 1 ? 'entry' : 'entries'}`;
+const countLabel = (n: number) => `${n} ${n === 1 ? 'entry' : 'entries'}`;
 ---
 
 <Layout metadata={metadata}>
@@ -45,7 +48,7 @@ const patentCountLabel = `${patents.length} ${patents.length === 1 ? 'entry' : '
       </dl>
 
       <p class="mt-6 text-center font-mono text-xs text-muted">{PUBLICATION_METRICS.citations}</p>
-      <div class="mt-4 flex justify-center">
+      <div class="mt-4 flex flex-wrap justify-center gap-3">
         <Button
           variant="secondary"
           text="Profile on Google Scholar"
@@ -53,21 +56,45 @@ const patentCountLabel = `${patents.length} ${patents.length === 1 ? 'entry' : '
           target="_blank"
           icon="tabler:external-link"
         />
+        <Button
+          variant="secondary"
+          text="ORCID record"
+          href={PUBLICATION_METRICS.orcidUrl}
+          target="_blank"
+          icon="tabler:external-link"
+        />
       </div>
     </div>
+
+    <section class="panel mb-6" data-publication-section="journal-articles">
+      <div class="mb-6 flex items-baseline justify-between gap-4">
+        <h2 class="font-mono text-xs uppercase tracking-[0.2em] text-muted">Journal articles</h2>
+        <span class="font-mono text-xs text-muted">{countLabel(journals.length)}</span>
+      </div>
+      <PublicationList items={journals} variant="full" />
+    </section>
+
+    <section class="panel mb-6" data-publication-section="conference-papers">
+      <div class="mb-6 flex items-baseline justify-between gap-4">
+        <h2 class="font-mono text-xs uppercase tracking-[0.2em] text-muted">Conference papers</h2>
+        <span class="font-mono text-xs text-muted">{countLabel(conferences.length)}</span>
+      </div>
+      <PublicationList items={conferences} variant="full" />
+    </section>
 
     <section class="panel mb-6" data-publication-section="patents">
       <div class="mb-6 flex items-baseline justify-between gap-4">
         <h2 class="font-mono text-xs uppercase tracking-[0.2em] text-muted">Patents</h2>
-        <span class="font-mono text-xs text-muted">{patentCountLabel}</span>
+        <span class="font-mono text-xs text-muted">{countLabel(patents.length)}</span>
       </div>
       <PublicationList items={patents} variant="full" />
     </section>
 
     <div class="panel text-center">
       <p class="text-muted">
-        Publication summary, citation figures, and patent details are taken verbatim from my résumé; the Google Scholar
-        profile stays the current record.
+        The publication summary, citation figures, and patent details come verbatim from my résumé. Papers — titles,
+        venues, years, and DOIs — are transcribed from my ORCID record; the Google Scholar profile stays the citation
+        record.
       </p>
     </div>
   </WidgetWrapper>
