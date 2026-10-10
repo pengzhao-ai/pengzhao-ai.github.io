@@ -10,6 +10,9 @@
 //   seconds of delay.
 // - An element counts as visible only when it actually intersects, so
 //   off-screen elements are never animated ahead of time.
+// - Taller elements get a reachable threshold: an element taller than
+//   viewportHeight / threshold can never reach its fraction, so any
+//   intersection counts for it (see shouldReveal).
 // - Only one level fades: a section whose children animate on their own is
 //   revealed at once, so items are not dimmed by a fading parent.
 ---
@@ -24,6 +27,8 @@
 
 <script>
   /* Inspired by: https://github.com/heidkaemper/tailwindcss-intersect */
+  import { shouldReveal } from './intersect-visibility.js';
+
   const SELECTOR = [
     '[class*=" intersect:"]',
     '[class*=":intersect:"]',
@@ -87,7 +92,13 @@
           const target = entry.target as HTMLElement;
           const threshold = this.thresholds.get(target) ?? 0;
           const once = target.classList.contains('intersect-once');
-          const visible = entry.isIntersecting && entry.intersectionRatio >= threshold;
+          const visible = shouldReveal({
+            isIntersecting: entry.isIntersecting,
+            intersectionRatio: entry.intersectionRatio,
+            threshold,
+            elementHeight: entry.boundingClientRect.height,
+            viewportHeight: window.innerHeight,
+          });
 
           if (visible) {
             if (target.hasAttribute('data-animated')) continue;
