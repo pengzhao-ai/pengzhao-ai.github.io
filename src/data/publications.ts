@@ -14,17 +14,21 @@ export const PUBLICATION_METRICS = {
 };
 
 /**
- * The papers, transcribed from the owner's ORCID record (fetched 2026-10-09
- * from https://pub.orcid.org/v3.0/0000-0001-6370-4206/works). ORCID is the
- * source the owner chose after the Google-Scholar-scraped list read as
- * inaccurate (namesake entries). Titles, venues, years, and DOIs are as
- * ORCID states them, with four editorial notes:
+ * The papers: the owner's ORCID record (fetched 2026-10-09 from
+ * https://pub.orcid.org/v3.0/0000-0001-6370-4206/works), plus the two 2012
+ * LED papers the owner asked for and Crossref verified. ORCID was chosen
+ * after the Google-Scholar-scraped list read as inaccurate (namesake
+ * entries). Titles, venues, years, and DOIs are as the source states them,
+ * with these notes:
  *
  * - Every ORCID `journal-article` is listed except the 2016 Optics Express
  *   erratum of the 2015 beam-deflection paper (a correction notice, not a
- *   paper). That 2015 paper, the 2012 LED journal papers, and the rest of
- *   the résumé's "13 Journals" are not in ORCID — add them there to have
- *   them listed here.
+ *   paper). The two 2012 LED papers at the end of this list are not in
+ *   ORCID; the owner asked for them and Crossref, the publisher-of-record
+ *   registry, verifies each (its author lists name Peng Zhao; DOIs are
+ *   rendered in the publisher's OE/OME casing). The 2015 beam-deflection
+ *   paper remains unlisted because ORCID carries only its erratum — add it
+ *   there, or ask, to extend the list.
  * - Conference entries are deduplicated by title (the four 2014 "CS2"
  *   records and the two 2014 "Förster resonance" records each describe one
  *   presentation indexed several times), and the publisher-collection
@@ -122,6 +126,24 @@ const JOURNAL_PUBLICATIONS: Publication[] = [
     type: 'journal',
     tags: [],
     doi: '10.1364/OPTICA.1.000436',
+  },
+  {
+    title:
+      'Analysis of light extraction efficiency enhancement for thin-film-flip-chip InGaN quantum wells light-emitting diodes with GaN micro-domes',
+    venue: 'Optics Express',
+    year: 2012,
+    type: 'journal',
+    tags: [],
+    doi: '10.1364/OE.20.00A765',
+  },
+  {
+    title:
+      'Analysis of TM mode light extraction efficiency enhancement for deep ultraviolet AlGaN quantum wells light-emitting diodes with III-nitride micro-domes',
+    venue: 'Optical Materials Express',
+    year: 2012,
+    type: 'journal',
+    tags: [],
+    doi: '10.1364/OME.2.001397',
   },
 ];
 

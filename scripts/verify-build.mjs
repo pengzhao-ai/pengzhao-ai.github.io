@@ -219,16 +219,17 @@ export async function main() {
 
   // 13. Publications (owner item 8 + Q3, revised twice): the summary,
   //     citation line, and patent details are the owner's résumé wording
-  //     verbatim; the papers list is transcribed from the owner's ORCID
-  //     record (chosen after the Google-Scholar-scraped list read as
-  //     inaccurate — namesake entries). Anchors guard against transcription
-  //     drift; the Scholar-author and erratum checks pin the exclusions.
+  //     verbatim; the papers list is the owner's ORCID record plus two
+  //     Crossref-verified 2012 LED papers (ORCID was chosen after the
+  //     Google-Scholar-scraped list read as inaccurate — namesake entries).
+  //     Anchors guard against transcription drift; the Scholar-author and
+  //     erratum checks pin the exclusions.
   const publicationsPage = await readFile(path.join(DIST, 'publications', 'index.html'), 'utf8');
   check(!publicationsPage.includes('data-filter-bar'), 'publication filter bar still rendered');
   const pubCount = (publicationsPage.match(/data-publication(?![-\w])/g) ?? []).length;
   check(
-    pubCount === 31,
-    `publications page lists ${pubCount} entries (expected 10 journal + 18 conference + 3 patents)`
+    pubCount === 33,
+    `publications page lists ${pubCount} entries (expected 12 journal + 18 conference + 3 patents)`
   );
   check(
     publicationsPage.includes('data-publication-section="journal-articles"'),
@@ -242,7 +243,23 @@ export async function main() {
     publicationsPage.includes('Nondegenerate three-photon absorption in zinc-blende semiconductors'),
     'papers panel is missing the 2025 Optics Express paper (ORCID anchor)'
   );
+  check(
+    publicationsPage.includes(
+      'Analysis of light extraction efficiency enhancement for thin-film-flip-chip InGaN quantum wells light-emitting diodes with GaN micro-domes'
+    ),
+    'papers panel is missing the 2012 micro-domes LED paper (Crossref-verified)'
+  );
+  check(
+    publicationsPage.includes(
+      'Analysis of TM mode light extraction efficiency enhancement for deep ultraviolet AlGaN quantum wells light-emitting diodes with III-nitride micro-domes'
+    ),
+    'papers panel is missing the 2012 TM-mode LED paper (Crossref-verified)'
+  );
   check(publicationsPage.includes('https://doi.org/10.1364/OE.543020'), 'papers panel is missing DOI links');
+  check(
+    publicationsPage.includes('https://doi.org/10.1364/OE.20.00A765'),
+    'the micro-domes LED paper DOI link is missing'
+  );
   check(publicationsPage.includes('orcid.org/0000-0001-6370-4206'), 'publications page does not link the ORCID record');
   check(
     !publicationsPage.includes('Erratum'),
