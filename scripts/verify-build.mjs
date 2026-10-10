@@ -174,14 +174,11 @@ export async function main() {
   check(!home.includes('Selected papers and patents'), 'home featured heading promises patents it does not render');
   // Owner follow-up: a slim experience strip names the four communities as
   // text wordmarks (CREOL, UCF appears nowhere else), and the publications
-  // panel shows all patents alongside the selected papers.
+  // panel shows the résumé publications summary alongside the patents.
   check(home.includes('CREOL, UCF'), 'home page is missing the experience strip (CREOL, UCF)');
   const homeEntries = (home.match(/data-publication(?![-\w])/g) ?? []).length;
-  check(
-    homeEntries >= 6,
-    `home page renders ${homeEntries} publication entries (expected 3 selected papers + 3 patents)`
-  );
-  check(home.includes('US 2023/0086536 A1'), 'home patents group is missing its entries');
+  check(homeEntries >= 3, `home page renders ${homeEntries} publication entries (expected the 3 patents)`);
+  check(home.includes('US20230086536A1'), 'home patents group is missing its entries');
 
   // 11. Photography lightbox (owner item 5): the viewer script scopes its
   //     queries to the <aw-photo-grid> root, so the dialog and every trigger
@@ -220,23 +217,28 @@ export async function main() {
   }
   check(home.includes('/toolbox'), 'home page does not link to /toolbox');
 
-  // 13. Publications (owner item 8 + Q3): the full Scholar-derived list ships
-  //     and the tag filter bar is gone. `data-publication` counts rendered
-  //     entries; the verbatim title and author anchors guard against
-  //     transcription drift (review caught a dropped 'R' in "MR Ferdinandus").
+  // 13. Publications (owner item 8 + Q3, revised): the page carries the
+  //     owner's résumé wording verbatim. The Google-Scholar-scraped article
+  //     list read as inaccurate (owner feedback) and was removed; the résumé
+  //     itemizes only the patents and a publications summary. The string
+  //     anchors guard against transcription drift, and the Scholar-author
+  //     needle pins the removal.
   const publicationsPage = await readFile(path.join(DIST, 'publications', 'index.html'), 'utf8');
   check(!publicationsPage.includes('data-filter-bar'), 'publication filter bar still rendered');
   const pubCount = (publicationsPage.match(/data-publication(?![-\w])/g) ?? []).length;
-  check(pubCount >= 25, `publications page lists ${pubCount} entries (expected at least 25)`);
+  check(pubCount === 3, `publications page lists ${pubCount} entries (expected the résumé's 3 patents)`);
   check(
-    publicationsPage.includes(
-      'Temporal, spectral, and polarization dependence of the nonlinear optical response of carbon disulfide'
-    ),
-    'publications page is missing the verbatim Google Scholar entry (Optica 2014)'
+    publicationsPage.includes('13 Journals, 8 Refereed Proceedings, and 28 Conference Presentations'),
+    'publications page is missing the résumé publications summary'
   );
   check(
-    publicationsPage.includes('MR Ferdinandus'),
-    'publications page is missing the verbatim Google Scholar author string'
+    publicationsPage.includes('Total Citations: 750+ (as of 2025.4); h-index: 11'),
+    'publications page is missing the résumé citations line'
+  );
+  check(publicationsPage.includes('US20230086536A1'), 'publications page is missing the résumé patent citation');
+  check(
+    !publicationsPage.includes('MR Ferdinandus'),
+    'Scholar-scraped publication entries are still on the publications page'
   );
 
   if (failures.length) {

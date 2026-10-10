@@ -14,23 +14,10 @@ const metadata = {
 
 const stats = HEADLINE_METRICS;
 
-const byYear = (a: { year: number }, b: { year: number }) => b.year - a.year;
-
-const journals = PUBLICATIONS.filter((p) => p.type === 'journal').sort(byYear);
-const proceedings = PUBLICATIONS.filter((p) => p.type === 'conference').sort(byYear);
-const patents = PUBLICATIONS.filter((p) => p.type === 'patent').sort(byYear);
-
-const breakdown = [
-  `${journals.length} journal articles`,
-  `${proceedings.length} refereed proceedings`,
-  `${patents.length} patents`,
-].join(', ');
-
-const sections = [
-  { id: 'journals', heading: 'Journal articles', items: journals },
-  { id: 'proceedings', heading: 'Refereed proceedings', items: proceedings },
-  { id: 'patents', heading: 'Patents', items: patents },
-];
+const patents = PUBLICATIONS.filter((p) => p.type === 'patent').sort((a, b) => b.year - a.year);
+// Assembled here so Prettier line-wrapping can never drop the space between
+// the count and the noun in the rendered HTML.
+const patentCountLabel = `${patents.length} ${patents.length === 1 ? 'entry' : 'entries'}`;
 ---
 
 <Layout metadata={metadata}>
@@ -40,7 +27,7 @@ const sections = [
         level={1}
         tagline="Publications"
         title="Papers and patents"
-        subtitle={breakdown}
+        subtitle={PUBLICATION_METRICS.summary}
         classes={{ container: 'max-w-3xl', title: 'text-4xl md:text-5xl ', subtitle: 'text-lg' }}
       />
 
@@ -56,26 +43,8 @@ const sections = [
           ))
         }
       </dl>
-    </div>
 
-    {
-      sections.map((section) => (
-        <section class="panel mb-6" data-publication-section={section.id}>
-          <div class="mb-6 flex items-baseline justify-between gap-4">
-            <h2 class="font-mono text-xs uppercase tracking-[0.2em] text-muted">{section.heading}</h2>
-            <span class="font-mono text-xs text-muted">
-              {section.items.length} {section.items.length === 1 ? 'entry' : 'entries'}
-            </span>
-          </div>
-          <PublicationList items={section.items} variant="full" />
-        </section>
-      ))
-    }
-
-    <div class="panel text-center">
-      <p class="text-muted">
-        Titles and author lists are taken verbatim from Google Scholar, where the record stays current.
-      </p>
+      <p class="mt-6 text-center font-mono text-xs text-muted">{PUBLICATION_METRICS.citations}</p>
       <div class="mt-4 flex justify-center">
         <Button
           variant="secondary"
@@ -85,6 +54,21 @@ const sections = [
           icon="tabler:external-link"
         />
       </div>
+    </div>
+
+    <section class="panel mb-6" data-publication-section="patents">
+      <div class="mb-6 flex items-baseline justify-between gap-4">
+        <h2 class="font-mono text-xs uppercase tracking-[0.2em] text-muted">Patents</h2>
+        <span class="font-mono text-xs text-muted">{patentCountLabel}</span>
+      </div>
+      <PublicationList items={patents} variant="full" />
+    </section>
+
+    <div class="panel text-center">
+      <p class="text-muted">
+        Publication summary, citation figures, and patent details are taken verbatim from my résumé; the Google Scholar
+        profile stays the current record.
+      </p>
     </div>
   </WidgetWrapper>
 </Layout>

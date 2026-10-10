@@ -7,7 +7,7 @@ import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 import Headline from '~/components/ui/Headline.astro';
 import PublicationList from '~/components/portfolio/PublicationList.astro';
 import SocialLinks from '~/components/portfolio/SocialLinks.astro';
-import { PUBLICATIONS } from '~/data/publications';
+import { PUBLICATIONS, PUBLICATION_METRICS } from '~/data/publications';
 import { TOOLBOX_CATEGORIES } from '~/data/toolbox';
 import { getPermalink } from '~/utils/permalinks';
 import profile from '~/assets/images/profile.jpg';
@@ -17,7 +17,6 @@ const metadata = {
   ignoreTitleTemplate: true,
 };
 
-const featuredPublications = PUBLICATIONS.filter((publication) => publication.featured).slice(0, 3);
 const patentPublications = PUBLICATIONS.filter((publication) => publication.type === 'patent').sort(
   (a, b) => b.year - a.year
 );
@@ -111,25 +110,19 @@ const EXPERIENCE_ORGS = ['Meta', 'Apple', 'ASML', 'CREOL, UCF'];
     </div>
   </WidgetWrapper>
 
-  {
-    featuredPublications.length > 0 && (
-      <WidgetWrapper containerClass="max-w-4xl mx-auto">
-        <div class="panel">
-          <Headline tagline="Publications" title="Papers and patents" classes={{ container: 'max-w-3xl' }} />
-          <h3 class="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-muted">Selected publications</h3>
-          <PublicationList items={featuredPublications} variant="compact" />
-          <div class="my-8 border-t border-slate-200/80 dark:border-slate-700/50" />
-          <h3 class="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-muted">Patents</h3>
-          <PublicationList items={patentPublications} variant="compact" />
-          <div class="mt-10 text-center">
-            <a href={getPermalink('/publications')} class="btn-secondary">
-              All publications
-            </a>
-          </div>
-        </div>
-      </WidgetWrapper>
-    )
-  }
+  <WidgetWrapper containerClass="max-w-4xl mx-auto">
+    <div class="panel">
+      <Headline tagline="Publications" title="Papers and patents" classes={{ container: 'max-w-3xl' }} />
+      <h3 class="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-muted">Publications</h3>
+      <p class="text-sm text-muted">{PUBLICATION_METRICS.summary}</p>
+      <div class="my-8 border-t border-slate-200/80 dark:border-slate-700/50"></div>
+      <h3 class="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-muted">Patents</h3>
+      <PublicationList items={patentPublications} variant="compact" />
+      <div class="mt-10 text-center">
+        <a href={getPermalink('/publications')} class="btn-secondary"> All publications </a>
+      </div>
+    </div>
+  </WidgetWrapper>
 
   <BlogLatestPosts
     title="Writing"

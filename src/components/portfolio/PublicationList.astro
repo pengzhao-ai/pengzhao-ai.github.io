@@ -11,8 +11,9 @@ const typeLabel = { journal: 'Journal', conference: 'Conference', patent: 'Paten
 const linkFor = (p: Publication) =>
   p.doi ? `https://doi.org/${p.doi.replace(/^https?:\/\/doi\.org\//, '')}` : undefined;
 
-// Scholar abbreviates the owner's name as "P Zhao"; the résumé entries spell
-// it out. Both get the emphasis.
+// The owner's name is emphasized wherever it appears in an author list.
+// ("P Zhao" is the Scholar-style abbreviation, kept in case such entries
+// return with an accurate source.)
 const isOwner = (author: string) => author === 'Peng Zhao' || author === 'P Zhao';
 ---
 
