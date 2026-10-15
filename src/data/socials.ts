@@ -11,6 +11,9 @@ export const SOCIALS: SocialLink[] = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/peng-zhao-nlo/', icon: 'tabler:brand-linkedin' },
   { label: 'ORCID', href: 'https://orcid.org/0000-0001-6370-4206', icon: 'tabler:atom' },
   { label: 'X', href: 'https://x.com/pengzha0', icon: 'tabler:brand-x' },
+  { label: 'Instagram', href: 'https://www.instagram.com/paulgazeup/', icon: 'tabler:brand-instagram' },
+  // Local icon (src/assets/icons/substack.svg): Tabler carries no Substack mark.
+  { label: 'Substack', href: 'https://substack.com/@pengzha0', icon: 'substack' },
   // Placeholder: rendered as a non-clickable entry until the owner supplies a URL.
   { label: '知乎', icon: 'tabler:brand-zhihu' },
 ];

@@ -3,14 +3,21 @@ import type { ImageMetadata } from 'astro';
 import Layout from '~/layouts/PageLayout.astro';
 import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 import Headline from '~/components/ui/Headline.astro';
+import Button from '~/components/ui/Button.astro';
 import PhotoGrid from '~/components/portfolio/PhotoGrid.astro';
 import { CATEGORY_LABELS, CATEGORY_ORDER, PHOTO_OVERRIDES } from '~/data/photography';
+import { SOCIALS } from '~/data/socials';
 import type { PhotoGroup } from '~/types';
 
 const metadata = {
   title: 'Photography',
   description: 'Selected landscape, wildlife, and macro photography.',
 };
+
+// The Instagram link comes from the shared social row, so the URL lives in one
+// place; the page fails loudly if the entry is ever removed.
+const instagram = SOCIALS.find((social) => social.label === 'Instagram');
+if (!instagram?.href) throw new Error('photography page needs the Instagram entry in src/data/socials.ts');
 
 // Every image under src/assets/images/photography/ is picked up
 // automatically. Dropping a new file into a category folder and rebuilding
@@ -66,5 +73,18 @@ const groups: PhotoGroup[] = [...byCategory.entries()]
       classes={{ container: 'max-w-3xl', title: 'text-4xl md:text-5xl ', subtitle: 'text-lg' }}
     />
     <PhotoGrid groups={groups} />
+
+    <div class="panel mt-6 text-center">
+      <p class="text-muted">More photographs on Instagram.</p>
+      <div class="mt-4 flex justify-center">
+        <Button
+          variant="secondary"
+          text="Follow @paulgazeup"
+          href={instagram.href}
+          target="_blank"
+          icon="tabler:brand-instagram"
+        />
+      </div>
+    </div>
   </WidgetWrapper>
 </Layout>

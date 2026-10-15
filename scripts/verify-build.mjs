@@ -76,7 +76,9 @@ export function toolboxLinkProblems(html) {
     const showcase = attr('data-toolbox-showcase');
 
     if (!repo || !/^https:\/\/github\.com\/pengzhao-ai\/[A-Za-z0-9._-]+\/?$/.test(repo)) {
-      problems.push(`toolbox entry "${name}" does not link a repo under github.com/pengzhao-ai (${repo ?? 'no repo link'})`);
+      problems.push(
+        `toolbox entry "${name}" does not link a repo under github.com/pengzhao-ai (${repo ?? 'no repo link'})`
+      );
       continue;
     }
 
@@ -360,6 +362,15 @@ export async function main() {
     !publicationsPage.includes('MR Ferdinandus'),
     'Scholar-scraped publication entries are still on the publications page'
   );
+
+  // 14. Contextual social links (owner update 2026-10-15): Instagram joins
+  //     /photography, Substack joins /blog, and both enter the shared social
+  //     row (src/data/socials.ts) that the home page and footer render. The
+  //     URLs are the owner's own, transcribed in artifacts/socials.md.
+  check(photoPage.includes('https://www.instagram.com/paulgazeup/'), 'photography page is missing the Instagram link');
+  check(blogIndex.includes('https://substack.com/@pengzha0'), 'blog page is missing the Substack link');
+  check(home.includes('https://www.instagram.com/paulgazeup/'), 'home social row is missing the Instagram link');
+  check(home.includes('https://substack.com/@pengzha0'), 'home social row is missing the Substack link');
 
   if (failures.length) {
     console.error(`\n✗ ${failures.length} verification failure(s):\n`);

@@ -6,6 +6,8 @@ import BlogList from '~/components/blog/List.astro';
 import Headline from '~/components/blog/Headline.astro';
 import Pagination from '~/components/blog/Pagination.astro';
 import Breadcrumbs from '~/components/common/Breadcrumbs.astro';
+import Button from '~/components/ui/Button.astro';
+import { SOCIALS } from '~/data/socials';
 import { getPermalink, getBlogPermalink } from '~/utils/permalinks';
 // import PostTags from "~/components/blog/Tags.astro";
 
@@ -21,6 +23,12 @@ type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { page } = Astro.props as Props;
 const currentPage = page.currentPage ?? 1;
+
+// The Substack link comes from the shared social row, so the URL lives in one
+// place; the page fails loudly if the entry is ever removed. It belongs to the
+// list page only — a post's own page stays about the post.
+const substack = SOCIALS.find((social) => social.label === 'Substack');
+if (!substack?.href) throw new Error('the blog page needs the Substack entry in src/data/socials.ts');
 
 const breadcrumbs = [
   { text: 'Home', href: getPermalink('/') },
@@ -59,6 +67,22 @@ const metadata = {
       <BlogList posts={page.data} />
       <Pagination prevUrl={page.url.prev} nextUrl={page.url.next} />
     </div>
+    {
+      currentPage === 1 && (
+        <div class="panel mt-6 text-center">
+          <p class="text-muted">Also on Substack.</p>
+          <div class="mt-4 flex justify-center">
+            <Button
+              variant="secondary"
+              text="Subscribe on Substack"
+              href={substack.href}
+              target="_blank"
+              icon="substack"
+            />
+          </div>
+        </div>
+      )
+    }
     <!--
       <PostTags tags={allCategories} class="mb-2" title="Search by Categories:" isCategory />
       <PostTags tags={allTags}  title="Search by Tags:" />

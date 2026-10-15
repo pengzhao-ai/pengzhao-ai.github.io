@@ -9,4 +9,6 @@ to change what the site shows.
 - Google Scholar: https://scholar.google.com/citations?user=w0H4EiQAAAAJ&hl=en&authuser=1
 - LinkedIn: https://www.linkedin.com/in/peng-zhao-nlo/
 - X: https://x.com/pengzha0
+- Instagram: [https://www.instagram.com/paulgazeup/](https://www.instagram.com/paulgazeup/)
+- Substack: [https://substack.com/@pengzha0](https://substack.com/@pengzha0)
 - 知乎: TBD (owner had not decided at time of transcription)

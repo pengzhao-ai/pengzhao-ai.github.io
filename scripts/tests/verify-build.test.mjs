@@ -64,7 +64,7 @@ const REPO = 'https://github.com/pengzhao-ai/webcam-smartDet';
 const SHOWCASE = 'https://pengzhao-ai.github.io/webcam-smartDet/';
 
 describe('toolboxLinkProblems', () => {
-  test('accepts a tile whose write-up is the repo\'s own GitHub Pages page', () => {
+  test("accepts a tile whose write-up is the repo's own GitHub Pages page", () => {
     assert.deepEqual(toolboxLinkProblems(tile({ repo: REPO, showcase: SHOWCASE })), []);
   });
 
@@ -72,7 +72,7 @@ describe('toolboxLinkProblems', () => {
     assert.deepEqual(toolboxLinkProblems(tile({ repo: REPO })), []);
   });
 
-  test('flags a write-up link that is not the repo\'s own Pages URL', () => {
+  test("flags a write-up link that is not the repo's own Pages URL", () => {
     // The mislink this guards: a tile pointing at another project's page.
     const problems = toolboxLinkProblems(tile({ repo: REPO, showcase: 'https://pengzhao-ai.github.io/other-repo/' }));
     assert.equal(problems.length, 1);
@@ -83,7 +83,7 @@ describe('toolboxLinkProblems', () => {
     assert.deepEqual(toolboxLinkProblems(tile({ repo: `${REPO}/`, showcase: SHOWCASE })), []);
   });
 
-  test('flags a repo outside the owner\'s GitHub account', () => {
+  test("flags a repo outside the owner's GitHub account", () => {
     const problems = toolboxLinkProblems(tile({ repo: 'https://github.com/someone-else/webcam-smartDet' }));
     assert.equal(problems.length, 1);
     assert.match(problems[0], /does not link a repo under github\.com\/pengzhao-ai/);

@@ -33,7 +33,7 @@ const featured = variant === 'featured';
           ]}
           data-toolbox-entry={repoNameOf(item.href)}
           data-toolbox-repo={item.href}
-          {...item.showcase ? { 'data-toolbox-showcase': item.showcase } : {}}
+          {...(item.showcase ? { 'data-toolbox-showcase': item.showcase } : {})}
         >
           {item.image && (
             <span
