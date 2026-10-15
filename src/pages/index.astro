@@ -20,11 +20,6 @@ const metadata = {
 const patentPublications = PUBLICATIONS.filter((publication) => publication.type === 'patent').sort(
   (a, b) => b.year - a.year
 );
-
-// Experience strip: reverse-chronological, names only — the affiliations are
-// the signal, no adjectives. Text wordmarks keep the calm palette and need no
-// logo assets or dark-mode variants.
-const EXPERIENCE_ORGS = ['Meta', 'Apple', 'ASML', 'CREOL, UCF'];
 ---
 
 <Layout metadata={metadata}>
@@ -57,9 +52,14 @@ const EXPERIENCE_ORGS = ['Meta', 'Apple', 'ASML', 'CREOL, UCF'];
             Hardware and AI, from concept to production
           </p>
           <p class="mx-auto mt-4 max-w-2xl text-lg text-muted text-pretty dark:text-slate-300 md:mx-0">
-            Camera and optical systems engineer. I design the optics, sensors, and imaging pipelines behind products
-            that have shipped at scale — and the frameworks that let teams predict how they will perform before anything
-            is built.
+            I'm an engineer fascinated by how devices perceive and interact with the physical world. Following my Ph.D.
+            in Optics and Photonics from CREOL, my journey has centered on leading sensing engineering initiatives across
+            ASML, Apple, and Meta, taking complex optical architectures from concept all the way to mass production.
+            Lately, I'm focused on pushing the frontier where smart hardware products interface with AI 🚀.
+          </p>
+          <p class="mx-auto mt-4 max-w-2xl text-lg text-muted text-pretty dark:text-slate-300 md:mx-0">
+            In my free time, I love getting outside for sports (🎾, 🏊‍♂️, 🏄‍♂️, 🥾) and exploring photography 📸. I'm
+            also big on traveling, teaching, and connecting with new people.
           </p>
           <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
             <a href={getPermalink('/toolbox')} class="btn-primary">View toolbox</a>
@@ -71,18 +71,6 @@ const EXPERIENCE_ORGS = ['Meta', 'Apple', 'ASML', 'CREOL, UCF'];
       <div class="mt-8 border-t border-slate-200/80 pt-6 dark:border-slate-700/50">
         <SocialLinks class="justify-center md:justify-start" />
       </div>
-    </div>
-  </section>
-
-  <section class="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
-    <div class="panel">
-      <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted">Experience</p>
-      <p class="mt-3 font-heading text-xl font-semibold tracking-tight text-heading sm:text-2xl">
-        {EXPERIENCE_ORGS.join(' · ')}
-      </p>
-      <p class="mt-3 max-w-3xl text-sm text-muted">
-        Optical and imaging systems across semiconductor lithography, consumer hardware, and AR/VR sensing.
-      </p>
     </div>
   </section>
 

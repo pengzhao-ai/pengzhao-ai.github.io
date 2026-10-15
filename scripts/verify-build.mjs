@@ -172,10 +172,20 @@ export async function main() {
   // The featured section renders only featured entries — currently journals —
   // so its heading must not promise patents it does not render (review finding).
   check(!home.includes('Selected papers and patents'), 'home featured heading promises patents it does not render');
-  // Owner follow-up: a slim experience strip names the four communities as
-  // text wordmarks (CREOL, UCF appears nowhere else), and the publications
-  // panel shows the résumé publications summary alongside the patents.
-  check(home.includes('CREOL, UCF'), 'home page is missing the experience strip (CREOL, UCF)');
+  // Owner update (2026-10-15): the hero bio is now the About Me draft, and the
+  // slim experience strip it replaces is gone — the affiliations live inside
+  // the About text itself. Both paragraphs are anchored (the owner edits this
+  // copy by hand, so transcription drift is the risk); the strip's descriptive
+  // line pins the removal.
+  check(
+    home.includes('fascinated by how devices perceive and interact with the physical world'),
+    'home page is missing the About Me opening paragraph'
+  );
+  check(home.includes('connecting with new people'), 'home page is missing the About Me second paragraph');
+  check(
+    !home.includes('Optical and imaging systems across semiconductor lithography'),
+    'the retired experience strip is still rendered on the home page'
+  );
   const homeEntries = (home.match(/data-publication(?![-\w])/g) ?? []).length;
   check(homeEntries >= 3, `home page renders ${homeEntries} publication entries (expected the 3 patents)`);
   check(home.includes('US20230086536A1'), 'home patents group is missing its entries');
