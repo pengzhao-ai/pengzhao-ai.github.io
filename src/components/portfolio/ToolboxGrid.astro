@@ -1,41 +1,99 @@
 ---
 import { Icon } from 'astro-icon/components';
 import Badge from '~/components/portfolio/Badge.astro';
-import type { ToolboxEntry } from '~/data/toolbox';
+import Image from '~/components/common/Image.astro';
+import { repoNameOf, type ToolboxEntry } from '~/data/toolbox';
 
 export interface Props {
   items: ToolboxEntry[];
+  /**
+   * `grid` is the /toolbox tile wall — thumbnails above the text, two columns.
+   * `featured` is the home-page highlight: one entry, image beside the text.
+   */
+  variant?: 'grid' | 'featured';
 }
 
-const { items } = Astro.props;
+const { items, variant = 'grid' } = Astro.props;
+const featured = variant === 'featured';
 ---
 
-<ul class="grid list-none gap-5 sm:grid-cols-2">
+<ul class:list={['grid list-none gap-5', featured ? 'mx-auto max-w-4xl' : 'sm:grid-cols-2']}>
   {
-    items.map((item) => (
-      <li class="tile">
-        <a
-          href={item.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="group flex h-full flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+    items.map((item) => {
+      // The tile opens the write-up when the project has one, the repo when it
+      // does not. The title carries the card-wide hit area (stretched link);
+      // the footer's Source link sits above it (z-10) and goes to the repo.
+      const primaryHref = item.showcase ?? item.href;
+      const repoOnly = !item.showcase;
+      return (
+        <li
+          class:list={[
+            'tile relative',
+            featured ? 'md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-center md:gap-8' : 'flex flex-col',
+          ]}
+          data-toolbox-entry={repoNameOf(item.href)}
+          data-toolbox-repo={item.href}
+          {...item.showcase ? { 'data-toolbox-showcase': item.showcase } : {}}
         >
-          <span class="flex items-start justify-between gap-3">
-            <span class="font-heading text-lg font-semibold text-heading transition group-hover:text-primary">
-              {item.title}
+          {item.image && (
+            <span
+              class:list={[
+                'block overflow-hidden rounded-lg border border-slate-200/80 dark:border-slate-700/50',
+                featured ? 'mb-5 md:mb-0' : 'mb-4',
+              ]}
+            >
+              <Image
+                src={item.image}
+                alt={item.imageAlt ?? ''}
+                widths={featured ? [480, 720, 960] : [320, 480, 640]}
+                sizes={featured ? '(max-width: 767px) 90vw, 400px' : '(max-width: 639px) 90vw, 420px'}
+                layout="constrained"
+                format="webp"
+                class="w-full"
+              />
             </span>
-            <Icon name="tabler:arrow-up-right" class="mt-1 h-4 w-4 shrink-0 text-muted" />
-          </span>
-          <span class="mt-2 flex-1 text-sm text-muted">{item.summary}</span>
-          {item.stack?.length ? (
-            <span class="mt-4 flex flex-wrap gap-1.5">
-              {item.stack.map((tech) => (
-                <Badge label={tech} />
-              ))}
+          )}
+          <div class="flex min-w-0 flex-1 flex-col">
+            <span class="flex items-start justify-between gap-3">
+              <a
+                href={primaryHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-heading text-lg font-semibold text-heading transition after:absolute after:inset-0 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                {item.title}
+              </a>
+              <span class="mt-1 flex shrink-0 items-center gap-1">
+                <span class="font-mono text-[11px] uppercase tracking-wide text-muted">
+                  {repoOnly ? 'Repo' : 'Write-up'}
+                </span>
+                <Icon name="tabler:arrow-up-right" class="h-4 w-4 text-muted" />
+              </span>
             </span>
-          ) : null}
-        </a>
-      </li>
-    ))
+            <span class="mt-2 flex-1 text-sm text-muted">{item.summary}</span>
+            {item.stack?.length ? (
+              <span class="mt-4 flex flex-wrap gap-1.5">
+                {item.stack.map((tech) => (
+                  <Badge label={tech} />
+                ))}
+              </span>
+            ) : null}
+            {!repoOnly && (
+              <span class="mt-4">
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="relative z-10 inline-flex items-center gap-1 font-mono text-xs text-muted transition hover:text-primary"
+                >
+                  Source
+                  <Icon name="tabler:brand-github" class="h-3 w-3" />
+                </a>
+              </span>
+            )}
+          </div>
+        </li>
+      );
+    })
   }
 </ul>

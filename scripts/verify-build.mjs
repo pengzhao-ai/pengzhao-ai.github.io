@@ -51,6 +51,47 @@ export function toolboxSectionProblems(html) {
   return problems;
 }
 
+/**
+ * Toolbox entries may carry a write-up link next to their source link. The
+ * owner rule is that no invented or dead link reaches the build, so a tile's
+ * write-up must be the repository's *own* GitHub Pages URL — a project page
+ * pointed at the wrong repo would be a silent mislink.
+ *
+ * Tiles are read as `<li … data-toolbox-entry … data-toolbox-repo …
+ * [data-toolbox-showcase]>` so the check follows the markup rather than a
+ * parallel list. Returns one message per offending tile (empty when the page
+ * is consistent), so the check keeps passing as entries are added.
+ */
+export function toolboxLinkProblems(html) {
+  const problems = [];
+  const tiles = html
+    .split('<li')
+    .slice(1)
+    .filter((chunk) => chunk.includes('data-toolbox-entry="'));
+
+  for (const tile of tiles) {
+    const attr = (name) => tile.match(new RegExp(`${name}="([^"]*)"`))?.[1];
+    const name = attr('data-toolbox-entry');
+    const repo = attr('data-toolbox-repo');
+    const showcase = attr('data-toolbox-showcase');
+
+    if (!repo || !/^https:\/\/github\.com\/pengzhao-ai\/[A-Za-z0-9._-]+\/?$/.test(repo)) {
+      problems.push(`toolbox entry "${name}" does not link a repo under github.com/pengzhao-ai (${repo ?? 'no repo link'})`);
+      continue;
+    }
+
+    const repoName = repo.replace(/\/+$/, '').split('/').pop();
+    if (name !== repoName) {
+      problems.push(`toolbox entry "${name}" is tagged with repo "${repoName}"`);
+    }
+    if (showcase && showcase !== `https://pengzhao-ai.github.io/${repoName}/`) {
+      problems.push(`toolbox entry "${name}" write-up link is not the repo's own GitHub Pages URL (${showcase})`);
+    }
+  }
+
+  return problems;
+}
+
 export async function main() {
   const failures = [];
   const check = (condition, message) => {
@@ -224,8 +265,39 @@ export async function main() {
     check(/data-toolbox-category="ai"/.test(toolbox), 'toolbox page is missing the AI category');
     for (const problem of toolboxSectionProblems(toolbox)) check(false, problem);
     check(!toolbox.includes('Case study'), 'toolbox page still carries case-study copy');
+    // Owner update (2026-10-15): the first entry, with its write-up and source
+    // links. The write-up is the repo's own GitHub Pages page — pinned by URL
+    // and validated for every tile by toolboxLinkProblems.
+    check(
+      toolbox.includes('https://pengzhao-ai.github.io/webcam-smartDet/'),
+      'toolbox page is missing the webcam-smartDet write-up link'
+    );
+    check(
+      toolbox.includes('https://github.com/pengzhao-ai/webcam-smartDet'),
+      'toolbox page is missing the webcam-smartDet source link'
+    );
+    check(toolbox.includes('Webcam Smart Detection'), 'toolbox page is missing the webcam-smartDet entry');
+    for (const problem of toolboxLinkProblems(toolbox)) check(false, problem);
   }
   check(home.includes('/toolbox'), 'home page does not link to /toolbox');
+
+  // The home toolbox panel highlights the featured entry — thumbnail, links,
+  // and no leftover "coming soon" copy now that an entry exists.
+  const homeTiles = home
+    .split('<li')
+    .slice(1)
+    .filter((chunk) => chunk.includes('data-toolbox-entry="'));
+  check(homeTiles.length >= 1, 'home page renders no featured toolbox entry');
+  check(
+    homeTiles.some((tile) => /<img\b/.test(tile)),
+    'the home featured toolbox entry has no thumbnail'
+  );
+  check(
+    /webcam-smartdet[^"']*\.(webp|avif|png|jpe?g)/.test(home),
+    'the home featured toolbox entry does not serve the webcam-smartDet thumbnail'
+  );
+  check(!home.includes('First entries are on the way'), 'home toolbox panel still promises entries that now exist');
+  for (const problem of toolboxLinkProblems(home)) check(false, problem);
 
   // 13. Publications (owner item 8 + Q3, revised twice): the summary,
   //     citation line, and patent details are the owner's résumé wording

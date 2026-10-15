@@ -5,13 +5,23 @@ import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 import Headline from '~/components/ui/Headline.astro';
 import Button from '~/components/ui/Button.astro';
 import ToolboxGrid from '~/components/portfolio/ToolboxGrid.astro';
-import { GITHUB_PROFILE, TOOLBOX, TOOLBOX_CATEGORIES, isGitHubRepoHref } from '~/data/toolbox';
+import { GITHUB_PROFILE, TOOLBOX, TOOLBOX_CATEGORIES, isGitHubRepoHref, isOwnerShowcaseHref } from '~/data/toolbox';
 
 // Fail the build on a violating entry rather than publishing a dead or
-// invented link (owner constraint: real public repos only).
+// invented link (owner constraint: real public repos only) — a write-up link
+// must be that repo's own GitHub Pages page, and the home-page highlight must
+// have a thumbnail to show.
 for (const entry of TOOLBOX) {
   if (!isGitHubRepoHref(entry.href)) {
     throw new Error(`Toolbox entry "${entry.title}" is not a github.com/pengzhao-ai repo URL: ${entry.href}`);
+  }
+  if (entry.showcase && !isOwnerShowcaseHref(entry.showcase, entry.href)) {
+    throw new Error(
+      `Toolbox entry "${entry.title}" write-up link is not the repo's own GitHub Pages URL: ${entry.showcase}`
+    );
+  }
+  if (entry.featured && !entry.image) {
+    throw new Error(`Toolbox entry "${entry.title}" is featured on the home page but has no thumbnail image`);
   }
 }
 
