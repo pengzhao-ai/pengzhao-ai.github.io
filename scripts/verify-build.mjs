@@ -279,24 +279,44 @@ export async function main() {
       'toolbox page is missing the webcam-smartDet source link'
     );
     check(toolbox.includes('Webcam Smart Detection'), 'toolbox page is missing the webcam-smartDet entry');
+    // Owner update (2026-10-16): the second entry, in optics — the category
+    // that showed its empty state until now.
+    check(
+      toolbox.includes('https://pengzhao-ai.github.io/SFR_Slanted/'),
+      'toolbox page is missing the SFR_Slanted write-up link'
+    );
+    check(
+      toolbox.includes('https://github.com/pengzhao-ai/SFR_Slanted'),
+      'toolbox page is missing the SFR_Slanted source link'
+    );
+    check(toolbox.includes('Slanted-Edge SFR'), 'toolbox page is missing the SFR_Slanted entry');
     for (const problem of toolboxLinkProblems(toolbox)) check(false, problem);
   }
   check(home.includes('/toolbox'), 'home page does not link to /toolbox');
 
-  // The home toolbox panel highlights the featured entry — thumbnail, links,
-  // and no leftover "coming soon" copy now that an entry exists.
+  // The home toolbox panel highlights the featured entries — thumbnails, links,
+  // and no leftover "coming soon" copy now that entries exist. Both projects
+  // are featured (owner decision, 2026-10-16), so the panel carries two cards.
   const homeTiles = home
     .split('<li')
     .slice(1)
     .filter((chunk) => chunk.includes('data-toolbox-entry="'));
-  check(homeTiles.length >= 1, 'home page renders no featured toolbox entry');
+  check(homeTiles.length >= 2, `home page highlights ${homeTiles.length} featured toolbox entries (expected both)`);
   check(
-    homeTiles.some((tile) => /<img\b/.test(tile)),
-    'the home featured toolbox entry has no thumbnail'
+    homeTiles.every((tile) => /<img\b/.test(tile)),
+    'a home featured toolbox entry has no thumbnail'
   );
   check(
     /webcam-smartdet[^"']*\.(webp|avif|png|jpe?g)/.test(home),
     'the home featured toolbox entry does not serve the webcam-smartDet thumbnail'
+  );
+  check(
+    /sfr-slanted[^"']*\.(webp|avif|png|jpe?g)/.test(home),
+    'the home featured toolbox entry does not serve the SFR_Slanted thumbnail'
+  );
+  check(
+    home.includes('https://pengzhao-ai.github.io/SFR_Slanted/'),
+    'home page is missing the SFR_Slanted featured toolbox entry'
   );
   check(!home.includes('First entries are on the way'), 'home toolbox panel still promises entries that now exist');
   for (const problem of toolboxLinkProblems(home)) check(false, problem);

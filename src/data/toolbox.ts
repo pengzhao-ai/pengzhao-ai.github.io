@@ -1,6 +1,7 @@
 import type { ImageMetadata } from 'astro';
 
 import smartDetThumb from '~/assets/images/toolbox/webcam-smartdet.webp';
+import slantedEdgeThumb from '~/assets/images/toolbox/sfr-slanted.webp';
 
 /**
  * Toolbox entries — one tile per public GitHub repository.
@@ -58,6 +59,19 @@ export const TOOLBOX: ToolboxEntry[] = [
       'A detection frame from the pipeline: green boxes labelled “person: 0.84” and “person: 0.82” drawn over two people on a stadium touchline.',
     category: 'ai',
     stack: ['Python', 'YOLOv8', 'OpenCV'],
+    featured: true,
+  },
+  {
+    title: 'Slanted-Edge SFR',
+    summary:
+      'Synthetic slanted-edge charts with a known answer — noise, vignetting, distortion, gamma — measured back by an ISO 12233 pipeline: 36 edges per chart, MTF50 and Nyquist metrics, and a validation module that says where recovery fails.',
+    href: 'https://github.com/pengzhao-ai/SFR_Slanted',
+    showcase: 'https://pengzhao-ai.github.io/SFR_Slanted/',
+    image: slantedEdgeThumb,
+    imageAlt:
+      'A synthetic slanted-edge test chart: nine tilted squares on grey, each with green ROI boxes labelled 0_T through 8_B for the thirty-six edges the pipeline measures.',
+    category: 'optics',
+    stack: ['Python', 'NumPy', 'SciPy', 'OpenCV'],
     featured: true,
   },
 ];
