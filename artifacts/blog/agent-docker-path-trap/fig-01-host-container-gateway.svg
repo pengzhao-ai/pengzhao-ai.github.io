@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="680" viewBox="0 0 1000 680">
+  <rect width="1000" height="680" fill="#FAFAFC"/>
+  <text x="500" y="55" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700" fill="#0F172A">Three parts, two boundaries</text>
+
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2563EB"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+
+  <rect x="350" y="90" width="300" height="110" rx="16" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"/>
+  <text x="500" y="135" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#0F172A">Host</text>
+  <text x="500" y="170" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" fill="#334155">~/projects</text>
+
+  <rect x="350" y="290" width="300" height="110" rx="16" fill="#FFFFFF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="500" y="335" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#0F172A">Container</text>
+  <text x="500" y="370" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" fill="#334155">/workspace</text>
+
+  <rect x="350" y="490" width="300" height="110" rx="16" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+  <text x="500" y="535" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#0F172A">Gateway</text>
+  <text x="500" y="570" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" fill="#334155">main profile</text>
+
+  <line x1="500" y1="200" x2="500" y2="290" stroke="#2563EB" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <text x="520" y="250" font-family="Inter, Arial, sans-serif" font-size="18" fill="#2563EB">bind mount</text>
+
+  <line x1="500" y1="490" x2="500" y2="400" stroke="#7C3AED" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#arrow-purple)"/>
+  <text x="520" y="450" font-family="Inter, Arial, sans-serif" font-size="18" fill="#7C3AED">dispatcher</text>
+</svg>

@@ -4,5 +4,11 @@
     "sourceHash": "6b9176100971cae10755bc3bef31e18ce311eeaa7728f72cc3b4fd047ed6405e",
     "target": "src/data/post/why-this-site-exists.md",
     "targetHash": "f1c8e9676217f9a00137db84fb44a334dbbd598a0ee6873a2d3f785b5a6339f7"
+  },
+  "agent-docker-path-trap": {
+    "source": "artifacts/blog/agent-docker-path-trap.md",
+    "sourceHash": "f52edc395a6ffafca29d3209d2763070c239ecb29c5f1b5b47fb2f58c769fc86",
+    "target": "src/data/post/agent-docker-path-trap.md",
+    "targetHash": "a52f7b7771ab2a7a0b95469bcc80e55f03b16ed3d1ac048bc9486a86b8035c36"
   }
 }

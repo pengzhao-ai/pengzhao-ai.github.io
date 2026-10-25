@@ -112,11 +112,12 @@ export function maskFences(text) {
       const fence = line.match(/^\s*(`{3,}|~{3,})/);
       if (fence) {
         const marker = fence[1][0];
+        const length = fence[1].length;
         if (open === null) {
-          open = marker;
+          open = { marker, length };
           return line;
         }
-        if (marker === open) {
+        if (marker === open.marker && length >= open.length) {
           open = null;
           return line;
         }
@@ -124,6 +125,89 @@ export function maskFences(text) {
       return open !== null ? ' '.repeat(line.length) : line;
     })
     .join('\n');
+}
+
+const IMAGE_REF_RE = /!\[([^\]]*)\]\(\s*(?:<([^>]+)>|([^)\s]+))((?:\s+["'][^"']*["'])?)\s*\)/g;
+
+const isLocalImageRef = (url) =>
+  Boolean(url) &&
+  !/^[a-z][a-z0-9+.-]*:/i.test(url) &&
+  !url.startsWith('/') &&
+  !url.startsWith('#') &&
+  !url.startsWith('~/');
+
+/**
+ * Collect Markdown image references outside fenced code blocks.
+ *
+ * The masked text has the same length as the body, so the returned offsets can
+ * be used to rewrite the original body without touching fenced examples. Only
+ * refs that point at a file relative to the draft are returned; remote, root,
+ * fragment, and already-rewritten `~/` paths are left for Astro to handle.
+ */
+export function collectImageRefs(body) {
+  const masked = maskFences(body);
+  const refs = [];
+  const re = new RegExp(IMAGE_REF_RE.source, IMAGE_REF_RE.flags);
+  let match;
+  while ((match = re.exec(masked)) !== null) {
+    const url = match[2] ?? match[3];
+    if (!isLocalImageRef(url)) continue;
+    refs.push({
+      url,
+      alt: match[1],
+      title: match[4] ?? '',
+      start: match.index,
+      end: match.index + match[0].length,
+    });
+  }
+  return refs;
+}
+
+/**
+ * Plan the copies and rewrites for local inline images.
+ *
+ * Each local ref is resolved against the draft's directory, copied under
+ * assetsDir/<slug>/, and rewritten to the `~/assets/images/posts/...` form
+ * Astro resolves. Missing sources are reported instead of emitting a broken
+ * build path, and two different sources may not share one destination.
+ */
+export async function planInlineImages({ body, sourceDir, slug, assetsDir }) {
+  const refs = collectImageRefs(body);
+  const missing = [];
+  const copiesByDest = new Map();
+  const rewrites = [];
+
+  for (const ref of refs) {
+    const src = path.resolve(sourceDir, ref.url);
+    const exists = await stat(src).then(
+      () => true,
+      () => false
+    );
+    if (!exists) {
+      missing.push(ref.url);
+      continue;
+    }
+
+    const basename = path.basename(ref.url);
+    const dest = path.join(assetsDir, slug, basename);
+    const previous = copiesByDest.get(dest);
+    if (previous && previous.src !== src) {
+      throw new Error(
+        `two inline images map to the same destination "${dest}":\n  ${previous.src}\n  ${src}\nrename one so the basenames differ.`
+      );
+    }
+    copiesByDest.set(dest, { src, dest });
+
+    rewrites.push({ ...ref, newUrl: `~/assets/images/posts/${slug}/${basename}` });
+  }
+
+  let rewritten = body;
+  for (const ref of rewrites.sort((a, b) => b.start - a.start)) {
+    const replacement = `![${ref.alt}](${ref.newUrl}${ref.title})`;
+    rewritten = rewritten.slice(0, ref.start) + replacement + rewritten.slice(ref.end);
+  }
+
+  return { body: rewritten, copies: Array.from(copiesByDest.values()), missing };
 }
 
 export function parseSource(raw) {
@@ -227,6 +311,8 @@ export function renderPost({
   category,
   tags,
   author,
+  series,
+  seriesOrder,
   body,
 }) {
   const data = {};
@@ -240,6 +326,8 @@ export function renderPost({
   if (category) data.category = category;
   if (tags?.length) data.tags = tags;
   if (author) data.author = author;
+  if (series) data.series = series;
+  if (seriesOrder) data.seriesOrder = seriesOrder;
 
   const fm = yaml.dump(data, { lineWidth: -1, noRefs: true, forceQuotes: false }).trimEnd();
   return `---\n${fm}\n---\n\n${body.trim()}\n`;
@@ -283,11 +371,19 @@ export async function copyPostImage(sourceImage, destDir = IMAGE_DEST) {
   return dest;
 }
 
+/** Copy an inline draft asset to its planned destination. */
+export async function copyPostAsset(sourceAsset, destPath) {
+  await mkdir(path.dirname(destPath), { recursive: true });
+  await copyFile(sourceAsset, destPath);
+  return destPath;
+}
+
 export async function planSync({
   force = false,
   sourcesDir = SOURCES_DIR,
   targetDir = TARGET_DIR,
   stateFile = STATE_FILE,
+  assetsDir = IMAGE_DEST,
 } = {}) {
   await mkdir(targetDir, { recursive: true });
 
@@ -342,6 +438,31 @@ export async function planSync({
     const sourceImage = image ? null : await findSourceImages(sourcePath, slug);
     if (sourceImage) image = `~/assets/images/posts/${path.basename(sourceImage)}`;
 
+    const inline = await planInlineImages({
+      body,
+      sourceDir: path.dirname(sourcePath),
+      slug,
+      assetsDir,
+    });
+    if (inline.missing.length) {
+      console.error(`Missing inline image(s) in ${name}: ${inline.missing.join(', ')}`);
+      process.exitCode = 2;
+      continue;
+    }
+
+    // Asset bytes are part of the source identity: replacing a figure without
+    // touching the Markdown must still update the copied file.
+    const assetFingerprint = inline.copies.length
+      ? (
+          await Promise.all(
+            inline.copies.map(async (copy) => `${path.basename(copy.dest)}:${hash(await readFile(copy.src))}`)
+          )
+        )
+          .sort()
+          .join('|')
+      : '';
+    const sourceHash = hash(assetFingerprint ? `${raw}\n${assetFingerprint}` : raw);
+
     const content = renderPost({
       title,
       publishDate,
@@ -353,7 +474,9 @@ export async function planSync({
       category: fm.category ?? tags[0],
       tags,
       author: fm.author ?? AUTHOR,
-      body,
+      series: fm.series,
+      seriesOrder: fm.seriesOrder,
+      body: inline.body,
     });
 
     const targetName = `${slug}.md`;
@@ -369,7 +492,7 @@ export async function planSync({
       targetExists,
       recordedTargetHash: record?.targetHash,
       currentTargetHash,
-      sourceChanged: !record || record.sourceHash !== hash(raw),
+      sourceChanged: !record || record.sourceHash !== sourceHash,
       force,
     });
 
@@ -380,8 +503,9 @@ export async function planSync({
       target: targetPath,
       targetName,
       content,
-      sourceHash: hash(raw),
+      sourceHash,
       sourceImage,
+      assetCopies: inline.copies,
     });
   }
 
@@ -409,13 +533,14 @@ export async function main({
   sourcesDir = SOURCES_DIR,
   targetDir = TARGET_DIR,
   stateFile = STATE_FILE,
+  assetsDir = IMAGE_DEST,
 } = {}) {
   const args = argv;
   const write = args.includes('--write');
   const force = args.includes('--force');
   const prune = args.includes('--prune');
 
-  const actions = await planSync({ force, sourcesDir, targetDir, stateFile });
+  const actions = await planSync({ force, sourcesDir, targetDir, stateFile, assetsDir });
   if (!actions.length) return;
 
   console.log(`\n${write ? 'WRITING' : 'PREVIEW (pass --write to apply)'}\n`);
@@ -454,8 +579,9 @@ export async function main({
       continue;
     }
     await mkdir(path.dirname(a.target), { recursive: true });
-    await writeFile(a.target, a.content, 'utf8');
     if (a.sourceImage) await copyPostImage(a.sourceImage);
+    for (const copy of a.assetCopies ?? []) await copyPostAsset(copy.src, copy.dest);
+    await writeFile(a.target, a.content, 'utf8');
     state[a.slug] = {
       source: path.relative(ROOT, a.source),
       sourceHash: a.sourceHash,

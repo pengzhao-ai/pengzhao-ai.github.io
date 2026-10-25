@@ -1,0 +1,14 @@
+---
+import { twMerge } from 'tailwind-merge';
+
+export interface Props {
+  series?: string;
+  seriesOrder?: number;
+  class?: string;
+}
+
+const { series, seriesOrder, class: className } = Astro.props;
+const label = series ? `${series}${seriesOrder ? ` · Part ${seriesOrder}` : ''}` : '';
+---
+
+{label && <p class={twMerge('font-mono text-xs uppercase tracking-[0.2em] text-primary', className)}>{label}</p>}

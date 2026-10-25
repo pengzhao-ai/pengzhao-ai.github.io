@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { toolboxLinkProblems, toolboxSectionProblems } from '../verify-build.mjs';
+import { featuredPostProblems, toolboxLinkProblems, toolboxSectionProblems } from '../verify-build.mjs';
 
 // Fixtures mirror what src/pages/toolbox.astro + ToolboxGrid render.
 const emptySection = (id) =>
@@ -19,6 +19,49 @@ const entrySection = (id) =>
       <li class="tile"><a href="https://github.com/pengzhao-ai/ray-tracer">Ray tracer</a></li>
     </ul>
   </section>`;
+
+const featuredCard = ({
+  image = true,
+  imageClass = 'relative block aspect-[16/9] self-start',
+  articleClass = 'tile-flush grid md:grid-cols-[1.15fr_1fr]',
+} = {}) =>
+  `<article data-featured-post class="${articleClass}">${
+    image ? `<a class="${imageClass}" href="/post/"><img src="/cover.webp" alt="cover"></a>` : ''
+  }<div class="p-6">text</div></article>`;
+
+describe('featuredPostProblems', () => {
+  test('accepts a cover in a non-stretching 16:9 frame', () => {
+    assert.deepEqual(featuredPostProblems(featuredCard()), []);
+  });
+
+  test('flags the md stretch that crops the cover', () => {
+    const problems = featuredPostProblems(
+      featuredCard({ imageClass: 'relative block aspect-[16/9] md:aspect-auto md:h-full self-start' })
+    );
+    assert.equal(problems.length, 1);
+    assert.match(problems[0], /must not stretch/);
+  });
+
+  test('flags a frame that is not top-aligned in the grid row', () => {
+    const problems = featuredPostProblems(featuredCard({ imageClass: 'relative block aspect-[16/9]' }));
+    assert.equal(problems.length, 1);
+    assert.match(problems[0], /top of the grid row/);
+  });
+
+  test('flags a coverless card that keeps the two-column grid', () => {
+    const problems = featuredPostProblems(featuredCard({ image: false }));
+    assert.equal(problems.length, 1);
+    assert.match(problems[0], /coverless featured post/);
+  });
+
+  test('accepts a coverless card without the two-column grid', () => {
+    assert.deepEqual(featuredPostProblems(featuredCard({ image: false, articleClass: 'tile-flush grid' })), []);
+  });
+
+  test('reports nothing for a page without a featured card', () => {
+    assert.deepEqual(featuredPostProblems('<html><body>no card</body></html>'), []);
+  });
+});
 
 describe('toolboxSectionProblems', () => {
   test('accepts a category showing its empty state', () => {

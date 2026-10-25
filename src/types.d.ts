@@ -23,6 +23,10 @@ export interface Post {
   category?: Taxonomy;
   tags?: Taxonomy[];
   author?: string;
+  /** Optional series name, e.g. "Hermes AI Agent". */
+  series?: string;
+  /** Optional 1-based position within `series`. */
+  seriesOrder?: number;
 
   metadata?: MetaData;
 

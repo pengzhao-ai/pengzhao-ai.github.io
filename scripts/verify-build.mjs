@@ -94,6 +94,50 @@ export function toolboxLinkProblems(html) {
   return problems;
 }
 
+/**
+ * The homepage's featured post card has two layout invariants:
+ *  - with a cover, the image stays in a 16:9 frame that does not stretch to
+ *    the (taller) text column, which would crop the title;
+ *  - without a cover, the card does not keep the two-column grid, which would
+ *    squeeze the text into a half-width track.
+ */
+export function featuredPostProblems(html) {
+  const marker = 'data-featured-post';
+  const markerIndex = html.indexOf(marker);
+  if (markerIndex === -1) return [];
+
+  const articleStart = html.lastIndexOf('<article', markerIndex);
+  const articleEnd = html.indexOf('</article>', markerIndex);
+  if (articleStart === -1 || articleEnd === -1) return ['featured post markup is incomplete'];
+
+  const article = html.slice(articleStart, articleEnd + '</article>'.length);
+  const articleClass = article.match(/<article[^>]*class="([^"]*)"/)?.[1] ?? '';
+  const imageIndex = article.indexOf('<img');
+  const problems = [];
+
+  if (imageIndex === -1) {
+    if (articleClass.includes('md:grid-cols-')) {
+      problems.push('coverless featured post must not use the two-column grid');
+    }
+    return problems;
+  }
+
+  const anchorStart = article.lastIndexOf('<a', imageIndex);
+  const anchor = anchorStart === -1 ? '' : article.slice(anchorStart, imageIndex);
+  const anchorClass = anchor.match(/class="([^"]*)"/)?.[1] ?? '';
+
+  if (!anchorClass.includes('aspect-[16/9]')) {
+    problems.push('featured post image frame must keep a 16:9 aspect ratio');
+  }
+  if (/md:aspect-auto|md:h-full/.test(anchorClass)) {
+    problems.push('featured post image frame must not stretch to the text column height');
+  }
+  if (!anchorClass.includes('self-start')) {
+    problems.push('featured post image frame must align to the top of the grid row');
+  }
+  return problems;
+}
+
 export async function main() {
   const failures = [];
   const check = (condition, message) => {
@@ -177,6 +221,7 @@ export async function main() {
   // 7. The site name reached the metadata.
   const home = await readFile(path.join(DIST, 'index.html'), 'utf8');
   check(home.includes('Peng Zhao'), "home page does not contain the owner's name");
+  for (const problem of featuredPostProblems(home)) failures.push(problem);
 
   // 8. Every top-level page carries an <h1>. ui/Headline renders <h2> by
   //    default, so a page whose title uses it must opt in with level={1}.

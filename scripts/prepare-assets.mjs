@@ -29,6 +29,9 @@ const PROFILE_MAX_EDGE = 1600;
 const PROFILE_QUALITY = 84;
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
+export const POST_COVER_WIDTH = 1600;
+export const POST_COVER_HEIGHT = 900;
+export const POST_COVER_QUALITY = 90;
 
 const IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png']);
 
@@ -70,6 +73,24 @@ export function planPhotoOutputs(sources, outDir) {
     }
     seen.set(dest, src);
     return { src, dest, category };
+  });
+}
+
+/**
+ * Plan one cover JPG per `artifacts/blog/<slug>/cover.svg`. The folder name is
+ * the post slug, so the output lines up with the generated post filename.
+ */
+export function planPostCoverOutputs(sources, outDir) {
+  const seen = new Map();
+  return sources.map((src) => {
+    const slug = path.basename(path.dirname(src));
+    const dest = path.join(outDir, `${slug}.jpg`);
+    const previous = seen.get(dest);
+    if (previous) {
+      throw new Error(`two post covers map to the same output "${dest}":\n  ${previous}\n  ${src}`);
+    }
+    seen.set(dest, src);
+    return { src, dest, slug };
   });
 }
 
@@ -139,6 +160,19 @@ export async function buildOgImage(dest) {
   await writeIfChanged(dest, buf);
 }
 
+/**
+ * Render a post cover SVG to a 1600x900 JPEG. Sharp drops metadata unless it is
+ * explicitly kept, so this output satisfies the no-EXIF invariant.
+ */
+export async function buildPostCover(src, dest) {
+  const svg = await readFile(src);
+  const buf = await sharp(svg)
+    .resize(POST_COVER_WIDTH, POST_COVER_HEIGHT, { fit: 'cover' })
+    .jpeg({ quality: POST_COVER_QUALITY, mozjpeg: true })
+    .toBuffer();
+  await writeIfChanged(dest, buf);
+}
+
 /** Render a square PNG (the iOS home-screen icon) from an SVG. */
 export async function buildTouchIcon(svgPath, dest) {
   await mkdir(path.dirname(dest), { recursive: true });
@@ -176,6 +210,29 @@ export async function main() {
   // Open Graph card
   await buildOgImage(path.join(OUT_IMAGES, 'og-default.jpg'));
   rows.push(['og-default.jpg', null]);
+
+  // Post covers: artifacts/blog/<slug>/cover.svg -> src/assets/images/posts/<slug>.jpg
+  const blogDir = path.join(ARTIFACTS, 'blog');
+  const coverSources = [];
+  try {
+    const entries = await readdir(blogDir, { withFileTypes: true });
+    for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+      if (!entry.isDirectory()) continue;
+      const cover = path.join(blogDir, entry.name, 'cover.svg');
+      try {
+        await stat(cover);
+        coverSources.push(cover);
+      } catch {
+        /* no cover for this post */
+      }
+    }
+  } catch {
+    /* no blog directory yet */
+  }
+  for (const { src, dest } of planPostCoverOutputs(coverSources, path.join(OUT_IMAGES, 'posts'))) {
+    await buildPostCover(src, dest);
+    rows.push([path.relative(ROOT, dest), null]);
+  }
 
   // Same SVG as the favicon, so the tab icon and the home-screen icon
   // can never drift apart.

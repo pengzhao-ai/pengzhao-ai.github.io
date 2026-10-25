@@ -7,7 +7,15 @@ import { after, before, describe, test } from 'node:test';
 
 import sharp from 'sharp';
 
-import { buildTouchIcon, normalizeCategory, optimizeImage, planPhotoOutputs, slugifyName } from '../prepare-assets.mjs';
+import {
+  buildPostCover,
+  buildTouchIcon,
+  normalizeCategory,
+  optimizeImage,
+  planPhotoOutputs,
+  planPostCoverOutputs,
+  slugifyName,
+} from '../prepare-assets.mjs';
 
 const hashFile = async (p) =>
   createHash('sha256')
@@ -74,6 +82,17 @@ describe('planPhotoOutputs', () => {
   test('normalises the source category folder on the way out', () => {
     const plan = planPhotoOutputs(['/src/protrait/IMG_1396.JPG'], '/out');
     assert.equal(plan[0].dest, '/out/photography/portrait/img-1396.jpg');
+  });
+});
+
+describe('planPostCoverOutputs', () => {
+  test('maps a post cover source to <slug>.jpg', () => {
+    const plan = planPostCoverOutputs(['/src/blog/my-post/cover.svg'], '/out');
+    assert.deepEqual(plan, [{ src: '/src/blog/my-post/cover.svg', dest: '/out/my-post.jpg', slug: 'my-post' }]);
+  });
+
+  test('aborts when two sources map to the same output', () => {
+    assert.throws(() => planPostCoverOutputs(['/a/foo/cover.svg', '/b/foo/cover.svg'], '/out'), /same output/);
   });
 });
 
@@ -181,5 +200,32 @@ describe('buildTouchIcon', () => {
     assert.equal(meta.width, 180);
     assert.equal(meta.height, 180);
     assert.equal(meta.format, 'png');
+  });
+});
+
+describe('buildPostCover', () => {
+  test('renders a 1600x900 JPEG with no EXIF, idempotently', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'post-cover-'));
+    try {
+      const src = path.join(dir, 'cover.svg');
+      await writeFile(
+        src,
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900"><rect width="1600" height="900" fill="#FAFAFC"/></svg>'
+      );
+      const a = path.join(dir, 'a.jpg');
+      const b = path.join(dir, 'b.jpg');
+
+      await buildPostCover(src, a);
+      await buildPostCover(src, b);
+
+      const meta = await sharp(a).metadata();
+      assert.equal(meta.width, 1600);
+      assert.equal(meta.height, 900);
+      assert.equal(meta.format, 'jpeg');
+      assert.equal(meta.exif, undefined);
+      assert.equal(await hashFile(a), await hashFile(b));
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 });

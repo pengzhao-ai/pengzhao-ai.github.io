@@ -2,6 +2,8 @@
 import { APP_BLOG } from 'astrowind:config';
 
 import Grid from '~/components/blog/Grid.astro';
+import FeaturedPost from '~/components/blog/FeaturedPost.astro';
+import CompactPostList from '~/components/blog/CompactPostList.astro';
 
 import { getBlogPermalink } from '~/utils/permalinks';
 import { findLatestPosts } from '~/utils/blog';
@@ -15,6 +17,8 @@ export interface Props extends Widget {
   linkUrl?: string | URL;
   information?: string;
   count?: number;
+  /** Render the newest post as a wide card and the rest as compact rows. */
+  featured?: boolean;
 }
 
 const {
@@ -23,6 +27,7 @@ const {
   linkUrl = getBlogPermalink(),
   information = await Astro.slots.render('information'),
   count = 4,
+  featured = false,
 
   id,
   isDark = false,
@@ -31,6 +36,7 @@ const {
 } = Astro.props;
 
 const posts = APP_BLOG.isEnabled ? await findLatestPosts({ count }) : [];
+const [lead, ...older] = posts;
 ---
 
 {
@@ -56,7 +62,14 @@ const posts = APP_BLOG.isEnabled ? await findLatestPosts({ count }) : [];
           {information && <p class="text-muted dark:text-slate-400 lg:text-sm lg:max-w-md" set:html={information} />}
         </div>
 
-        <Grid posts={posts} />
+        {featured && lead ? (
+          <>
+            <FeaturedPost post={lead} />
+            <CompactPostList posts={older} />
+          </>
+        ) : (
+          <Grid posts={posts} />
+        )}
       </div>
     </WidgetWrapper>
   ) : (

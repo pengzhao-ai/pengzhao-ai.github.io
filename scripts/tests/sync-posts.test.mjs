@@ -6,6 +6,7 @@ import { describe, test } from 'node:test';
 
 import {
   classify,
+  collectImageRefs,
   copyPostImage,
   decideDraft,
   deriveExcerpt,
@@ -15,6 +16,7 @@ import {
   main,
   maskFences,
   parseSource,
+  planInlineImages,
   planSync,
   renderPost,
   slugifyTitle,
@@ -52,6 +54,114 @@ describe('maskFences', () => {
     const masked = maskFences('```\nx\n```');
     assert.ok(masked.startsWith('```'));
     assert.ok(masked.endsWith('```'));
+  });
+
+  test('does not close a longer fence at a shorter inner fence', () => {
+    const input = '````md\n```sh\n![x](inside.svg)\n```\n````\nafter';
+    const masked = maskFences(input);
+    assert.ok(!masked.includes('inside.svg'), 'content inside the outer fence must be masked');
+    assert.ok(masked.includes('after'), 'content after the outer fence must remain');
+  });
+});
+
+describe('collectImageRefs', () => {
+  test('finds local images outside fences and skips remote, root, ~/, and fenced refs', () => {
+    const body = [
+      '![a](figures/a.svg)',
+      '![b](https://example.com/b.png)',
+      '![c](/abs/c.png)',
+      '![d](~/assets/images/d.png)',
+      '```md',
+      '![e](inside/e.svg)',
+      '```',
+      '![f](figures/f.svg "Title")',
+    ].join('\n');
+
+    assert.deepEqual(
+      collectImageRefs(body).map((ref) => ref.url),
+      ['figures/a.svg', 'figures/f.svg']
+    );
+  });
+
+  test('preserves alt text and the optional title for rewriting', () => {
+    const [ref] = collectImageRefs('![A description](figures/a.svg "Title")');
+    assert.equal(ref.alt, 'A description');
+    assert.equal(ref.title, ' "Title"');
+  });
+
+  test('ignores refs inside a longer fenced block with a shorter inner fence', () => {
+    const body = '````md\n```sh\n![x](inside.svg)\n```\n````\n![y](outside.svg)';
+    assert.deepEqual(
+      collectImageRefs(body).map((ref) => ref.url),
+      ['outside.svg']
+    );
+  });
+});
+
+describe('planInlineImages', () => {
+  test('rewrites local refs and plans copies into the slug asset folder', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'inline-images-'));
+    try {
+      const sourceDir = path.join(dir, 'blog');
+      await mkdir(path.join(sourceDir, 'figures'), { recursive: true });
+      await writeFile(path.join(sourceDir, 'figures', 'a.svg'), '<svg>a</svg>');
+
+      const result = await planInlineImages({
+        body: '![A](figures/a.svg)',
+        sourceDir,
+        slug: 'my-post',
+        assetsDir: path.join(dir, 'assets'),
+      });
+
+      assert.equal(result.body, '![A](~/assets/images/posts/my-post/a.svg)');
+      assert.deepEqual(result.copies, [
+        {
+          src: path.join(sourceDir, 'figures', 'a.svg'),
+          dest: path.join(dir, 'assets', 'my-post', 'a.svg'),
+        },
+      ]);
+      assert.deepEqual(result.missing, []);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('reports a missing referenced file instead of planning a broken path', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'inline-missing-'));
+    try {
+      const result = await planInlineImages({
+        body: '![A](missing.svg)',
+        sourceDir: dir,
+        slug: 'x',
+        assetsDir: path.join(dir, 'assets'),
+      });
+      assert.deepEqual(result.missing, ['missing.svg']);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('aborts when two different sources would collide on one destination basename', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'inline-collision-'));
+    try {
+      await mkdir(path.join(dir, 'a'), { recursive: true });
+      await mkdir(path.join(dir, 'b'), { recursive: true });
+      await writeFile(path.join(dir, 'a', 'fig.svg'), 'a');
+      await writeFile(path.join(dir, 'b', 'fig.svg'), 'b');
+
+      await assert.rejects(
+        () =>
+          planInlineImages({
+            body: '![A](a/fig.svg)\n![B](b/fig.svg)',
+            sourceDir: dir,
+            slug: 'x',
+            assetsDir: path.join(dir, 'assets'),
+          }),
+        /same destination/
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 });
 
@@ -296,6 +406,27 @@ describe('renderPost', () => {
     assert.ok(fm.includes('title: Hi'));
     assert.ok(out.endsWith('Body.\n'));
   });
+
+  test('writes optional series metadata and omits it when absent', () => {
+    const base = {
+      title: 'Hi',
+      publishDate: new Date('2026-10-24T00:00:00.000Z'),
+      excerpt: 'Short.',
+      tags: ['AI'],
+      category: 'AI',
+      author: 'Peng Zhao',
+      draft: false,
+      body: 'Body.',
+    };
+
+    const withSeries = renderPost({ ...base, series: 'Hermes AI Agent', seriesOrder: 1 });
+    assert.match(withSeries, /^series: Hermes AI Agent$/m);
+    assert.match(withSeries, /^seriesOrder: 1$/m);
+
+    const without = renderPost(base);
+    assert.doesNotMatch(without, /^series:/m);
+    assert.doesNotMatch(without, /^seriesOrder:/m);
+  });
 });
 
 describe('slugifyTitle', () => {
@@ -332,6 +463,66 @@ describe('planSync slug collisions', () => {
         ['same-title', 'same-title-2', 'same-title-3']
       );
     } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('planSync inline assets', () => {
+  test('writes rewritten paths and copies assets, and an asset edit forces an update', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'sync-inline-'));
+    try {
+      const sourcesDir = path.join(dir, 'blog');
+      const targetDir = path.join(dir, 'post');
+      const assetsDir = path.join(dir, 'assets');
+      const stateFile = path.join(dir, 'state.json');
+      await mkdir(path.join(sourcesDir, 'my-post'), { recursive: true });
+      await writeFile(path.join(sourcesDir, 'my-post.md'), '# My Post\n\n![Fig](my-post/fig.svg)\n');
+      await writeFile(path.join(sourcesDir, 'my-post', 'fig.svg'), '<svg>one</svg>');
+
+      const [first] = await planSync({ sourcesDir, targetDir, assetsDir, stateFile });
+      assert.equal(first.action, 'create');
+      assert.match(first.content, /~\/assets\/images\/posts\/my-post\/fig\.svg/);
+      assert.equal(first.assetCopies.length, 1);
+
+      await main({ argv: ['--write'], sourcesDir, targetDir, assetsDir, stateFile });
+      assert.equal(await readFile(path.join(assetsDir, 'my-post', 'fig.svg'), 'utf8'), '<svg>one</svg>');
+
+      await writeFile(path.join(sourcesDir, 'my-post', 'fig.svg'), '<svg>two</svg>');
+      const [again] = await planSync({ sourcesDir, targetDir, assetsDir, stateFile });
+      assert.equal(again.action, 'update');
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('sets exit code 2, names the file, and skips the post when a figure is missing', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'sync-missing-'));
+    const saved = process.exitCode;
+    const savedError = console.error;
+    const errors = [];
+    console.error = (...args) => errors.push(args.join(' '));
+    try {
+      const sourcesDir = path.join(dir, 'blog');
+      await mkdir(sourcesDir);
+      await writeFile(path.join(sourcesDir, 'broken.md'), '# Broken\n\n![Fig](missing.svg)\n');
+
+      const actions = await planSync({
+        sourcesDir,
+        targetDir: path.join(dir, 'post'),
+        assetsDir: path.join(dir, 'assets'),
+        stateFile: path.join(dir, 'state.json'),
+      });
+
+      assert.deepEqual(actions, []);
+      assert.equal(process.exitCode, 2);
+      assert.ok(
+        errors.some((line) => line.includes('missing.svg')),
+        'the error must name the missing file'
+      );
+    } finally {
+      console.error = savedError;
+      process.exitCode = saved;
       await rm(dir, { recursive: true, force: true });
     }
   });

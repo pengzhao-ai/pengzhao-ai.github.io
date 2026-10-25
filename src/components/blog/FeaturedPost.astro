@@ -1,0 +1,72 @@
+---
+import { APP_BLOG } from 'astrowind:config';
+import type { ImageMetadata } from 'astro';
+
+import Image from '~/components/common/Image.astro';
+import SeriesLabel from '~/components/blog/SeriesLabel.astro';
+import Tags from '~/components/blog/Tags.astro';
+
+import { findImage } from '~/utils/images';
+import { getPermalink } from '~/utils/permalinks';
+import { getFormattedDate } from '~/utils/utils';
+import type { Post } from '~/types';
+
+export interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const image = (await findImage(post.image)) as ImageMetadata | string | undefined;
+const link = APP_BLOG?.post?.isEnabled ? getPermalink(post.permalink, 'post') : '';
+---
+
+<article data-featured-post class:list={['tile-flush grid', image && 'md:grid-cols-[1.15fr_1fr]']}>
+  {
+    image && (
+      <a href={link || undefined} class="relative block aspect-[16/9] self-start bg-slate-100 dark:bg-slate-800">
+        <Image
+          src={image}
+          class="h-full w-full object-cover"
+          widths={[400, 900]}
+          width={900}
+          height={506}
+          sizes="(max-width: 767px) 100vw, 55vw"
+          alt={post.imageAlt || post.title}
+          format="webp"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+    )
+  }
+  <div class="flex flex-col p-6 sm:p-8">
+    <SeriesLabel series={post.series} seriesOrder={post.seriesOrder} />
+    <p class="mt-2 text-xs text-muted">
+      <time datetime={post.publishDate.toISOString()}>{getFormattedDate(post.publishDate)}</time>
+      {post.category && <> · {post.category.title}</>}
+      {post.readingTime && <> · {post.readingTime} min read</>}
+    </p>
+    <h3 class="mt-3 font-heading text-2xl font-bold leading-tight tracking-tight text-heading sm:text-3xl">
+      {
+        link ? (
+          <a class="transition hover:text-primary" href={link}>
+            {post.title}
+          </a>
+        ) : (
+          post.title
+        )
+      }
+    </h3>
+    {post.excerpt && <p class="mt-3 text-muted">{post.excerpt}</p>}
+    <div class="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6">
+      {post.tags && <Tags tags={post.tags} class="text-xs" />}
+      {
+        link && (
+          <a class="text-sm font-semibold text-primary hover:underline" href={link}>
+            Read the post →
+          </a>
+        )
+      }
+    </div>
+  </div>
+</article>

@@ -11,7 +11,7 @@ Turn raw drafts in `artifacts/blog/` into published posts.
 | `npm run sync:posts -- --write --force` | Also overwrite targets edited by hand since the last sync. |
 | `npm run sync:posts -- --write --prune` | Also delete targets whose source was removed.              |
 
-Exit codes: `0` success, `1` conflict, `2` malformed source frontmatter.
+Exit codes: `0` success, `1` conflict, `2` malformed source frontmatter or a missing inline image.
 
 ## What gets inferred
 
@@ -39,6 +39,22 @@ Edit `TAG_KEYWORDS` in `scripts/sync-posts.mjs`. The vocabulary is deliberately
 closed — `Optics`, `Hardware`, `Edge AI`, `System Design`, `Career` — and
 anything unmatched becomes `Engineering`. After editing, run
 `npm test` (the keyword matcher is covered) and re-sync.
+
+## Inline images, covers, and series
+
+- A relative Markdown image reference (for example `my-post/fig-01.svg`) is copied to
+  `src/assets/images/posts/<slug>/<filename>` and rewritten to
+  `~/assets/images/posts/<slug>/<filename>` in the generated post.
+- Remote URLs, root-relative paths (`/…`), fragments, and already-rewritten `~/…` paths are left alone.
+- A missing referenced file fails the sync with exit code 2 and names the file. Two different sources may not
+  share one destination basename.
+- Changing an inline file without changing the draft is a source change: the asset bytes are part of the recorded
+  source hash, so the next sync reports `update` and re-copies it.
+- A post cover is generated from `artifacts/blog/<slug>/cover.svg` by `npm run prepare:assets` into
+  `src/assets/images/posts/<slug>.jpg`. Declare it in the draft as
+  `image: '~/assets/images/posts/<slug>.jpg'`.
+- `series` and `seriesOrder` are explicit frontmatter fields. The sync preserves them; the site renders them as a
+  small label such as `Hermes AI Agent · Part 1`.
 
 ## Conflicts
 
