@@ -1,5 +1,6 @@
 import type { ImageMetadata } from 'astro';
 
+import camsimThumb from '~/assets/images/toolbox/camsim.webp';
 import smartDetThumb from '~/assets/images/toolbox/webcam-smartdet.webp';
 import slantedEdgeThumb from '~/assets/images/toolbox/sfr-slanted.webp';
 
@@ -31,6 +32,8 @@ export interface ToolboxEntry {
    * at another project's page.
    */
   showcase?: string;
+  /** The published package page, when the project ships one (e.g. PyPI). */
+  pypi?: string;
   /** Card thumbnail, imported from `src/assets/images/toolbox/`. */
   image?: ImageMetadata;
   /** Required with `image`: the thumbnail is content, not decoration. */
@@ -48,6 +51,20 @@ export const TOOLBOX_CATEGORIES: ToolboxCategory[] = [
 ];
 
 export const TOOLBOX: ToolboxEntry[] = [
+  {
+    title: 'camsim — Camera Sensor & ISP Simulation',
+    summary:
+      'Full physical simulation of the camera sensor and ISP — from sensor-plane spectral irradiance → RAW through QE, CFA, IR-cut, shot/read/dark-current/fixed-pattern noise and dual conversion gain (LCG/HCG) → a linear-light ISP → MTF, SNR, ΔE2000 and acutance. Published on PyPI, it is the bridge from photon-level optical simulation to image-quality metrics and downstream machine-vision and ML studies.',
+    href: 'https://github.com/pengzhao-ai/camsim',
+    showcase: 'https://pengzhao-ai.github.io/camsim/',
+    pypi: 'https://pypi.org/project/camsim/',
+    image: camsimThumb,
+    imageAlt:
+      'Four panels of the same ColorChecker scene through camsim: a RAW CFA mosaic, the demosaiced colour image, the colour-corrected image, and the final tone-mapped output.',
+    category: 'optics',
+    stack: ['Python', 'NumPy', 'SciPy', 'colour-science'],
+    featured: true,
+  },
   {
     title: 'Webcam Smart Detection',
     summary:
@@ -91,3 +108,7 @@ export const repoNameOf = (repoHref: string): string => repoHref.replace(/\/+$/,
  */
 export const isOwnerShowcaseHref = (showcase: string, repoHref: string): boolean =>
   showcase === `https://pengzhao-ai.github.io/${repoNameOf(repoHref)}/`;
+
+/** A package link is accepted only when it is a PyPI project URL. */
+export const isPyPIProjectHref = (href: string): boolean =>
+  /^https:\/\/pypi\.org\/project\/[A-Za-z0-9._-]+\/?$/.test(href);

@@ -5,7 +5,14 @@ import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 import Headline from '~/components/ui/Headline.astro';
 import Button from '~/components/ui/Button.astro';
 import ToolboxGrid from '~/components/portfolio/ToolboxGrid.astro';
-import { GITHUB_PROFILE, TOOLBOX, TOOLBOX_CATEGORIES, isGitHubRepoHref, isOwnerShowcaseHref } from '~/data/toolbox';
+import {
+  GITHUB_PROFILE,
+  TOOLBOX,
+  TOOLBOX_CATEGORIES,
+  isGitHubRepoHref,
+  isOwnerShowcaseHref,
+  isPyPIProjectHref,
+} from '~/data/toolbox';
 
 // Fail the build on a violating entry rather than publishing a dead or
 // invented link (owner constraint: real public repos only) — a write-up link
@@ -20,6 +27,9 @@ for (const entry of TOOLBOX) {
       `Toolbox entry "${entry.title}" write-up link is not the repo's own GitHub Pages URL: ${entry.showcase}`
     );
   }
+  if (entry.pypi && !isPyPIProjectHref(entry.pypi)) {
+    throw new Error(`Toolbox entry "${entry.title}" package link is not a PyPI project URL: ${entry.pypi}`);
+  }
   if (entry.featured && !entry.image) {
     throw new Error(`Toolbox entry "${entry.title}" is featured on the home page but has no thumbnail image`);
   }
@@ -27,7 +37,8 @@ for (const entry of TOOLBOX) {
 
 const metadata = {
   title: 'Toolbox',
-  description: 'Public code projects: optical tooling and AI/imaging pipelines, one GitHub repository at a time.',
+  description:
+    'Public code projects: optical simulation and tooling, imaging pipelines, and AI, one GitHub repository at a time.',
 };
 ---
 
@@ -37,7 +48,7 @@ const metadata = {
       level={1}
       tagline="Code"
       title="Toolbox"
-      subtitle="Small, open tools from my own work — optical design utilities and imaging/AI pipelines, published here as each one is ready to be looked at."
+      subtitle="Open tools from my own work — optical simulation, imaging pipelines, and AI at the edge, published here as each one is ready to be looked at."
       classes={{ container: 'max-w-3xl', title: 'text-4xl md:text-5xl', subtitle: 'text-lg' }}
     />
 

@@ -34,6 +34,7 @@ const featured = variant === 'featured';
           data-toolbox-entry={repoNameOf(item.href)}
           data-toolbox-repo={item.href}
           {...(item.showcase ? { 'data-toolbox-showcase': item.showcase } : {})}
+          {...(item.pypi ? { 'data-toolbox-pypi': item.pypi } : {})}
         >
           {item.image && (
             <span
@@ -78,17 +79,30 @@ const featured = variant === 'featured';
                 ))}
               </span>
             ) : null}
-            {!repoOnly && (
-              <span class="mt-4">
-                <a
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="relative z-10 inline-flex items-center gap-1 font-mono text-xs text-muted transition hover:text-primary"
-                >
-                  Source
-                  <Icon name="tabler:brand-github" class="h-3 w-3" />
-                </a>
+            {(item.pypi || !repoOnly) && (
+              <span class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                {!repoOnly && (
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="relative z-10 inline-flex items-center gap-1 font-mono text-xs text-muted transition hover:text-primary"
+                  >
+                    Source
+                    <Icon name="tabler:brand-github" class="h-3 w-3" />
+                  </a>
+                )}
+                {item.pypi && (
+                  <a
+                    href={item.pypi}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="relative z-10 inline-flex items-center gap-1 font-mono text-xs text-muted transition hover:text-primary"
+                  >
+                    PyPI
+                    <Icon name="tabler:package" class="h-3 w-3" />
+                  </a>
+                )}
               </span>
             )}
           </div>

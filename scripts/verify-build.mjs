@@ -74,6 +74,7 @@ export function toolboxLinkProblems(html) {
     const name = attr('data-toolbox-entry');
     const repo = attr('data-toolbox-repo');
     const showcase = attr('data-toolbox-showcase');
+    const pypi = attr('data-toolbox-pypi');
 
     if (!repo || !/^https:\/\/github\.com\/pengzhao-ai\/[A-Za-z0-9._-]+\/?$/.test(repo)) {
       problems.push(
@@ -88,6 +89,9 @@ export function toolboxLinkProblems(html) {
     }
     if (showcase && showcase !== `https://pengzhao-ai.github.io/${repoName}/`) {
       problems.push(`toolbox entry "${name}" write-up link is not the repo's own GitHub Pages URL (${showcase})`);
+    }
+    if (pypi && !/^https:\/\/pypi\.org\/project\/[A-Za-z0-9._-]+\/?$/.test(pypi)) {
+      problems.push(`toolbox entry "${name}" PyPI link is not a pypi.org project URL (${pypi})`);
     }
   }
 
@@ -335,18 +339,30 @@ export async function main() {
       'toolbox page is missing the SFR_Slanted source link'
     );
     check(toolbox.includes('Slanted-Edge SFR'), 'toolbox page is missing the SFR_Slanted entry');
+    // Owner update (2026-10-30): camsim, the flagship sensor/ISP simulator,
+    // enters the optics category with its PyPI release linked on the tile.
+    check(
+      toolbox.includes('https://pengzhao-ai.github.io/camsim/'),
+      'toolbox page is missing the camsim write-up link'
+    );
+    check(toolbox.includes('https://github.com/pengzhao-ai/camsim'), 'toolbox page is missing the camsim source link');
+    check(toolbox.includes('https://pypi.org/project/camsim/'), 'toolbox page is missing the camsim PyPI link');
+    check(toolbox.includes('camsim — Camera Sensor &amp; ISP Simulation'), 'toolbox page is missing the camsim entry');
     for (const problem of toolboxLinkProblems(toolbox)) check(false, problem);
   }
   check(home.includes('/toolbox'), 'home page does not link to /toolbox');
 
   // The home toolbox panel highlights the featured entries — thumbnails, links,
-  // and no leftover "coming soon" copy now that entries exist. Both projects
-  // are featured (owner decision, 2026-10-16), so the panel carries two cards.
+  // and no leftover "coming soon" copy now that entries exist. All three
+  // projects are featured (owner decision, 2026-10-30), camsim leading.
   const homeTiles = home
     .split('<li')
     .slice(1)
     .filter((chunk) => chunk.includes('data-toolbox-entry="'));
-  check(homeTiles.length >= 2, `home page highlights ${homeTiles.length} featured toolbox entries (expected both)`);
+  check(
+    homeTiles.length >= 3,
+    `home page highlights ${homeTiles.length} featured toolbox entries (expected all three)`
+  );
   check(
     homeTiles.every((tile) => /<img\b/.test(tile)),
     'a home featured toolbox entry has no thumbnail'
@@ -359,6 +375,15 @@ export async function main() {
     /sfr-slanted[^"']*\.(webp|avif|png|jpe?g)/.test(home),
     'the home featured toolbox entry does not serve the SFR_Slanted thumbnail'
   );
+  check(
+    /camsim[^"']*\.(webp|avif|png|jpe?g)/.test(home),
+    'the home featured toolbox entry does not serve the camsim thumbnail'
+  );
+  check(
+    home.includes('https://pengzhao-ai.github.io/camsim/'),
+    'home page is missing the camsim featured toolbox entry'
+  );
+  check(home.includes('https://pypi.org/project/camsim/'), 'home page is missing the camsim PyPI link');
   check(
     home.includes('https://pengzhao-ai.github.io/SFR_Slanted/'),
     'home page is missing the SFR_Slanted featured toolbox entry'

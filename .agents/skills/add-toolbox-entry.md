@@ -15,6 +15,7 @@
   summary: 'One or two sentences.' // required — what it does and why it exists
   href: 'https://github.com/pengzhao-ai/ray-tracer', // required — a real public repo
   showcase: 'https://pengzhao-ai.github.io/ray-tracer/', // optional — the repo's own write-up
+  pypi: 'https://pypi.org/project/ray-tracer/',    // optional — published package page
   image: rayTracerThumb,          // optional — import of the thumbnail
   imageAlt: 'What the thumbnail shows.', // required with `image`
   category: 'optics',             // required: 'optics' | 'ai'
@@ -33,7 +34,11 @@
   so a tile can never point at another project's page. Check the page is live
   before adding it: the build cannot reach the network.
 - A tile with a `showcase` opens the write-up; its footer keeps a `Source` link
-  to the repo. A tile without one opens the repo.
+  to the repo. A tile without one opens the repo. A `pypi` link adds a second
+  footer link to the published package.
+- `pypi` is accepted only as `https://pypi.org/project/<name>/` (a trailing
+  slash is optional). `/toolbox` fails the build on any other URL, and
+  `scripts/verify-build.mjs` re-checks every rendered tile.
 - `featured: true` puts the entry on the home page highlight, which requires
   `image` + `imageAlt` (the build fails otherwise).
 - An entry appears on `/toolbox` under its category; the category's empty

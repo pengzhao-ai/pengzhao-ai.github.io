@@ -98,10 +98,10 @@ describe('toolboxSectionProblems', () => {
 });
 
 // Fixture mirrors the tool tile markup ToolboxGrid renders.
-const tile = ({ name = 'webcam-smartDet', repo, showcase, extra = '' }) =>
+const tile = ({ name = 'webcam-smartDet', repo, showcase, pypi, extra = '' }) =>
   `<ul><li class="tile" data-toolbox-entry="${name}" data-toolbox-repo="${repo}"${
     showcase ? ` data-toolbox-showcase="${showcase}"` : ''
-  }${extra}><a href="${showcase ?? repo}">${name}</a></li></ul>`;
+  }${pypi ? ` data-toolbox-pypi="${pypi}"` : ''}${extra}><a href="${showcase ?? repo}">${name}</a></li></ul>`;
 
 const REPO = 'https://github.com/pengzhao-ai/webcam-smartDet';
 const SHOWCASE = 'https://pengzhao-ai.github.io/webcam-smartDet/';
@@ -130,6 +130,27 @@ describe('toolboxLinkProblems', () => {
     const problems = toolboxLinkProblems(tile({ repo: 'https://github.com/someone-else/webcam-smartDet' }));
     assert.equal(problems.length, 1);
     assert.match(problems[0], /does not link a repo under github\.com\/pengzhao-ai/);
+  });
+
+  test('accepts a PyPI project link', () => {
+    assert.deepEqual(
+      toolboxLinkProblems(tile({ repo: REPO, showcase: SHOWCASE, pypi: 'https://pypi.org/project/camsim/' })),
+      []
+    );
+  });
+
+  test('flags a package link outside pypi.org', () => {
+    const problems = toolboxLinkProblems(
+      tile({ repo: REPO, showcase: SHOWCASE, pypi: 'https://example.com/project/camsim/' })
+    );
+    assert.equal(problems.length, 1);
+    assert.match(problems[0], /PyPI link is not a pypi\.org project URL/);
+  });
+
+  test('flags a PyPI URL that is not a project page', () => {
+    const problems = toolboxLinkProblems(tile({ repo: REPO, showcase: SHOWCASE, pypi: 'https://pypi.org/camsim/' }));
+    assert.equal(problems.length, 1);
+    assert.match(problems[0], /PyPI link is not a pypi\.org project URL/);
   });
 
   test('flags a tile tagged with a different repo than it links', () => {
